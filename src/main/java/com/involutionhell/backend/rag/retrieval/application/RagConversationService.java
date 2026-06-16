@@ -28,6 +28,8 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.UUID;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -40,6 +42,7 @@ public class RagConversationService {
     private static final int HISTORY_LIMIT = 10;
     private static final int DEFAULT_PAGE_LIMIT = 20;
     private static final int MAX_PAGE_LIMIT = 100;
+    private static final int GENERATED_TITLE_MAX_LENGTH = 60;
     private static final String ASK_FAILED_MESSAGE_PREFIX = "本轮问答失败，请重试。原因：";
     private static final String STALE_ASK_RECOVERY_CODE = "StaleRunningAskRecovered";
     private static final String STALE_ASK_RECOVERY_MESSAGE = "问答流异常中断且失败标记未及时落库，系统已自动恢复失败状态。";
@@ -76,11 +79,10 @@ public class RagConversationService {
             RagSearchFilter filter
     ) {
         requireText(userId, "userId 不能为空");
-        requireText(conversationId, "conversationId 不能为空");
         requireText(question, "问题不能为空");
         String normalizedRequestId = normalizeRequestId(requestId);
         userRepository.upsertSeen(userId);
-        RagConversationRecord conversation = requireOwnedConversation(userId, conversationId, true);
+        RagConversationRecord conversation = getOrCreateOwnedConversation(userId, conversationId, question);
         conversationRepository.lockById(conversation.id());
         if (normalizedRequestId != null) {
             var existingRun = askRunRepository.findByRequestId(userId, conversation.id(), normalizedRequestId);
@@ -277,6 +279,36 @@ public class RagConversationService {
         return conversation;
     }
 
+    private RagConversationRecord getOrCreateOwnedConversation(String userId, String conversationId, String question) {
+        String normalizedConversationId = normalizeConversationId(conversationId);
+        if (normalizedConversationId == null) {
+            return createGeneratedConversation(userId, question);
+        }
+        return conversationRepository.findByConversationId(normalizedConversationId)
+                .map(conversation -> requireUsableConversation(userId, conversation, true))
+                .orElseGet(() -> createProvidedConversation(userId, normalizedConversationId, question));
+    }
+
+    private RagConversationRecord createGeneratedConversation(String userId, String question) {
+        for (int attempt = 0; attempt < 3; attempt++) {
+            try {
+                String generatedConversationId = "conv:" + UUID.randomUUID();
+                return conversationRepository.create(userId, generatedConversationId, titleFromQuestion(question));
+            } catch (DuplicateKeyException ignored) {
+                // UUID 冲突极低；重试可覆盖并发或测试中的人为碰撞。
+            }
+        }
+        throw new ResponseStatusException(HttpStatus.CONFLICT, "conversationId 生成冲突，请重试");
+    }
+
+    private RagConversationRecord createProvidedConversation(String userId, String conversationId, String question) {
+        try {
+            return conversationRepository.create(userId, conversationId, titleFromQuestion(question));
+        } catch (DuplicateKeyException ignored) {
+            return requireOwnedConversation(userId, conversationId, true);
+        }
+    }
+
     private AskConversationState existingAskState(
             RagConversationRecord conversation,
             String question,
@@ -321,6 +353,42 @@ public class RagConversationService {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "status 只能是 ACTIVE、ARCHIVED 或 DELETED");
         }
         return normalized;
+    }
+
+    private String normalizeConversationId(String conversationId) {
+        if (!StringUtils.hasText(conversationId)) {
+            return null;
+        }
+        String normalized = conversationId.trim();
+        if (normalized.length() > 128) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "conversationId 长度不能超过 128");
+        }
+        return normalized;
+    }
+
+    private RagConversationRecord requireUsableConversation(
+            String userId,
+            RagConversationRecord conversation,
+            boolean detectConflict
+    ) {
+        if (!conversation.userId().equals(userId)) {
+            HttpStatus status = detectConflict ? HttpStatus.CONFLICT : HttpStatus.NOT_FOUND;
+            throw new ResponseStatusException(status, detectConflict ? "conversationId 已被其他 userId 使用" : "会话不存在");
+        }
+        if ("DELETED".equals(conversation.status())) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "会话不存在");
+        }
+        return conversation;
+    }
+
+    private String titleFromQuestion(String question) {
+        String normalized = question == null ? "" : question.trim().replaceAll("\\s+", " ");
+        if (normalized.isEmpty()) {
+            return null;
+        }
+        return normalized.length() <= GENERATED_TITLE_MAX_LENGTH
+                ? normalized
+                : normalized.substring(0, GENERATED_TITLE_MAX_LENGTH);
     }
 
     private String failureMessage(Throwable exception) {

@@ -16,6 +16,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.ai.vectorstore.milvus.MilvusVectorStore;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -46,13 +47,13 @@ public class HybridRagRetriever implements RagRetriever {
             KeywordRagRetriever keywordRagRetriever,
             RagDocumentJoiner ragDocumentJoiner,
             RagProperties ragProperties,
-            @Qualifier("ragVirtualThreadExecutor") Executor ragVirtualThreadExecutor,
+            @Qualifier("ragVirtualThreadExecutor") ObjectProvider<Executor> ragVirtualThreadExecutorProvider,
             RagRetrievalMetrics retrievalMetrics) {
         this.ragMilvusRetriever = ragMilvusRetriever;
         this.keywordRagRetriever = keywordRagRetriever;
         this.ragDocumentJoiner = ragDocumentJoiner;
         this.ragProperties = ragProperties;
-        this.ragVirtualThreadExecutor = ragVirtualThreadExecutor;
+        this.ragVirtualThreadExecutor = ragVirtualThreadExecutorProvider.getIfAvailable(() -> Runnable::run);
         this.retrievalMetrics = retrievalMetrics;
     }
 

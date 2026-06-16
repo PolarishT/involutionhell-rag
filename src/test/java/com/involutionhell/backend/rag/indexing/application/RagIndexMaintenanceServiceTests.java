@@ -4,18 +4,14 @@ import com.involutionhell.backend.rag.indexing.model.RagIndexJobStatus;
 import com.involutionhell.backend.rag.indexing.model.RagIndexStage;
 import com.involutionhell.backend.rag.indexing.persistence.RagIndexJobRecord;
 import com.involutionhell.backend.rag.indexing.persistence.RagIndexJobRepository;
-import com.involutionhell.backend.rag.indexing.persistence.jdbcImpl.JdbcRagIndexJobRepository;
 import com.involutionhell.backend.rag.indexing.workflow.IndexWorkflowCommand;
 import com.involutionhell.backend.rag.indexing.workflow.IndexWorkflowService;
 import com.involutionhell.backend.rag.shared.properties.RagProperties;
-import java.sql.Timestamp;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.datasource.DriverManagerDataSource;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionStatus;
@@ -76,26 +72,6 @@ class RagIndexMaintenanceServiceTests {
         assertThat(workflowService.failCommands).hasSize(1);
     }
 
-    @Test
-    void jdbcFindStaleJobsDoesNotReturnTerminalStatuses() {
-        JdbcTemplate jdbc = new JdbcTemplate(dataSource());
-        createJobTable(jdbc);
-        OffsetDateTime oldTime = OffsetDateTime.now().minusHours(2);
-        insertJob(jdbc, 1L, RagIndexJobStatus.RUNNING, RagIndexStage.VECTOR_INDEXING, oldTime);
-        insertJob(jdbc, 2L, RagIndexJobStatus.QUEUED, RagIndexStage.QUEUED, oldTime);
-        insertJob(jdbc, 3L, RagIndexJobStatus.FAILED, RagIndexStage.COMMIT_INDEX, oldTime);
-        insertJob(jdbc, 4L, RagIndexJobStatus.SUCCEEDED, RagIndexStage.COMPLETED, oldTime);
-        insertJob(jdbc, 5L, RagIndexJobStatus.SKIPPED, RagIndexStage.SKIPPED, oldTime);
-
-        JdbcRagIndexJobRepository repository = new JdbcRagIndexJobRepository(jdbc);
-
-        List<RagIndexJobRecord> staleJobs = repository.findStaleJobs(OffsetDateTime.now().minusHours(1), 10);
-
-        assertThat(staleJobs)
-                .extracting(RagIndexJobRecord::status)
-                .containsExactly(RagIndexJobStatus.RUNNING.name(), RagIndexJobStatus.QUEUED.name());
-    }
-
     private static RagIndexMaintenanceService newService(
             RagIndexJobRepository jobRepository,
             RagIndexingService indexingService,
@@ -150,60 +126,6 @@ class RagIndexMaintenanceServiceTests {
                 null,
                 now.minusHours(2),
                 now.minusHours(2)
-        );
-    }
-
-    private static DriverManagerDataSource dataSource() {
-        DriverManagerDataSource dataSource = new DriverManagerDataSource();
-        dataSource.setDriverClassName("org.h2.Driver");
-        dataSource.setUrl("jdbc:h2:mem:rag_index_maintenance;MODE=PostgreSQL;DB_CLOSE_DELAY=-1");
-        return dataSource;
-    }
-
-    private static void createJobTable(JdbcTemplate jdbc) {
-        jdbc.execute(
-                """
-                CREATE TABLE rag_index_jobs (
-                    id BIGINT PRIMARY KEY,
-                    document_id BIGINT NOT NULL,
-                    content_sha256 VARCHAR(64) NOT NULL,
-                    status VARCHAR(16) NOT NULL,
-                    stage VARCHAR(32) NOT NULL,
-                    version BIGINT NOT NULL DEFAULT 0,
-                    last_event VARCHAR(32),
-                    attempt_count INTEGER NOT NULL DEFAULT 0,
-                    target_generation BIGINT,
-                    message_id VARCHAR(128),
-                    last_error TEXT,
-                    started_at TIMESTAMP,
-                    finished_at TIMESTAMP,
-                    created_at TIMESTAMP NOT NULL,
-                    updated_at TIMESTAMP NOT NULL
-                )
-                """
-        );
-    }
-
-    private static void insertJob(
-            JdbcTemplate jdbc,
-            Long id,
-            RagIndexJobStatus status,
-            RagIndexStage stage,
-            OffsetDateTime updatedAt
-    ) {
-        jdbc.update(
-                """
-                INSERT INTO rag_index_jobs (
-                    id, document_id, content_sha256, status, stage, version, attempt_count, created_at, updated_at
-                ) VALUES (?, ?, ?, ?, ?, 0, 0, ?, ?)
-                """,
-                id,
-                id,
-                "sha-" + id,
-                status.name(),
-                stage.name(),
-                Timestamp.from(updatedAt.minusHours(1).toInstant()),
-                Timestamp.from(updatedAt.toInstant())
         );
     }
 

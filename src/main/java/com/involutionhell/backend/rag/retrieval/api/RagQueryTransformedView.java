@@ -8,6 +8,9 @@ public record RagQueryTransformedView(
         String retrievalQuestion,
         boolean queryTransformed,
         boolean transformedByModel,
-        int conversationTurns
+        int conversationTurns,
+        Double rewriteConfidence,
+        String rewriteDecision,
+        String rewriteConfidenceReason
 ) {
 }

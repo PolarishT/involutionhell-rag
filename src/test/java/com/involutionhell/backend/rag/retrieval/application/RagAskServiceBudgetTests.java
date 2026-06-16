@@ -6,6 +6,9 @@ import com.involutionhell.backend.rag.retrieval.api.RagAskCompletedView;
 import com.involutionhell.backend.rag.retrieval.api.RagConversationMessage;
 import com.involutionhell.backend.rag.retrieval.api.RagAskRequest;
 import com.involutionhell.backend.rag.retrieval.api.RagAskStreamEvent;
+import com.involutionhell.backend.rag.retrieval.api.RagQueryTransformedView;
+import com.involutionhell.backend.rag.retrieval.harness.DefaultRagQueryHarness;
+import com.involutionhell.backend.rag.retrieval.harness.RagQueryHarness;
 import com.involutionhell.backend.rag.retrieval.model.RagRetrievedChunk;
 import com.involutionhell.backend.rag.retrieval.observability.RagRetrievalMetrics;
 import com.involutionhell.backend.rag.retrieval.persistence.RagConversationMessageRecord;
@@ -45,12 +48,20 @@ class RagAskServiceBudgetTests {
         RecordingRetriever retriever = new RecordingRetriever(request -> List.of(chunk(request.query().hashCode() & 1000L)));
         RagAskService service = service(expander, planner, retriever);
 
-        service.askStream(request(2)).collectList().block();
+        List<RagAskStreamEvent> events = service.askStream(request(2)).collectList().block();
 
         assertThat(planner.initialRetrievalQueries).containsExactly("q1", "q2", "q3");
         assertThat(retriever.requests).hasSize(3);
         assertThat(retriever.requests)
                 .allSatisfy(recorded -> assertThat(recorded.budget().perQueryTopK()).isEqualTo(2));
+        RagQueryTransformedView transformed = (RagQueryTransformedView) events.stream()
+                .filter(event -> "query_transformed".equals(event.event()))
+                .findFirst()
+                .orElseThrow()
+                .data();
+        assertThat(transformed.rewriteConfidence()).isNull();
+        assertThat(transformed.rewriteDecision()).isEqualTo("skipped_disabled");
+        assertThat(transformed.rewriteConfidenceReason()).isNull();
     }
 
     @Test
@@ -175,16 +186,22 @@ class RagAskServiceBudgetTests {
     ) {
         RagProperties properties = RagProperties.defaults();
         RagRetrievalMetrics metrics = new RagRetrievalMetrics(emptyProvider());
-        return new RagAskService(
+        RagQueryHarness queryHarness = new DefaultRagQueryHarness(
                 new EmptyChunkQueryFacade(),
                 retriever,
                 new FixedTransformer(metrics, properties),
                 expander,
                 new RagDocumentJoiner(properties),
                 planner,
-                new RagAnswerGenerator(emptyProvider(), metrics, properties),
                 properties,
                 null,
+                metrics,
+                Schedulers.immediate()
+        );
+        return new RagAskService(
+                queryHarness,
+                new RagAnswerGenerator(emptyProvider(), metrics, properties),
+                properties,
                 metrics,
                 Schedulers.immediate(),
                 conversationService
@@ -228,7 +245,7 @@ class RagAskServiceBudgetTests {
     private static final class FixedTransformer extends RagQueryTransformer {
 
         private FixedTransformer(RagRetrievalMetrics metrics, RagProperties properties) {
-            super(emptyProvider(), emptyProvider(), properties, new RagOpenAiTokenCounter(properties), metrics);
+            super(emptyProvider(), emptyProvider(), null, properties, new RagOpenAiTokenCounter(properties), metrics);
         }
 
         @Override

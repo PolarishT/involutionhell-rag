@@ -1,9 +1,11 @@
 package com.involutionhell.backend.rag.common.error;
 
 import com.involutionhell.backend.rag.common.api.ApiResponse;
+import com.involutionhell.backend.rag.common.ratelimit.RateLimitExceededException;
 import jakarta.validation.ConstraintViolationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindException;
@@ -17,6 +19,13 @@ import java.util.Optional;
 public class GlobalExceptionHandler {
 
     private static final Logger log = LoggerFactory.getLogger(GlobalExceptionHandler.class);
+
+    @ExceptionHandler(RateLimitExceededException.class)
+    public ResponseEntity<ApiResponse<Void>> handleRateLimitExceeded(RateLimitExceededException exception) {
+        return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS)
+                .header(HttpHeaders.RETRY_AFTER, String.valueOf(exception.retryAfterSeconds()))
+                .body(ApiResponse.fail(exception.getReason()));
+    }
 
     /**
      * 将参数校验异常转换为 400 响应

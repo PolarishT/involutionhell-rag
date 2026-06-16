@@ -9,6 +9,8 @@ public interface RagConversationRepository {
 
     Optional<RagConversationRecord> findByUserIdAndConversationId(String userId, String conversationId);
 
+    RagConversationRecord create(String userId, String conversationId, String title);
+
     RagConversationPage findByUserId(String userId, int limit, RagConversationCursor cursor);
 
     RagConversationRecord update(String userId, String conversationId, String title, String status);

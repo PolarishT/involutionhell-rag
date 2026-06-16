@@ -43,7 +43,7 @@ public class IndexWorkflowProjector {
         switch (toState) {
             case QUEUED -> {
                 if (fromState == IndexWorkflowState.NEW || fromState == IndexWorkflowState.FAILED) {
-                    // 全新创建或失败重排队，内部使用 INSERT ... ON CONFLICT 防御
+                    // 全新创建或失败重排队，内部使用 update-first/insert-fallback 防御并发写入。
                     jobRepository.queue(documentId, contentSha256);
                 } else {
                     // 重复排队，基于旧状态进行原子重置

@@ -13,7 +13,9 @@ import org.springframework.ai.chat.messages.SystemMessage;
 import org.springframework.ai.chat.messages.UserMessage;
 import org.springframework.ai.rag.Query;
 import org.springframework.ai.rag.preretrieval.query.transformation.CompressionQueryTransformer;
+import org.springframework.ai.rag.preretrieval.query.transformation.QueryTransformer;
 import org.springframework.ai.rag.preretrieval.query.transformation.RewriteQueryTransformer;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.stereotype.Service;
 
@@ -30,16 +32,43 @@ import java.util.Objects;
 public class RagQueryTransformer {
 
     private static final Logger log = LoggerFactory.getLogger(RagQueryTransformer.class);
+    private static final String REWRITE_APPLIED_LOW_CONFIDENCE = "applied_low_confidence";
+    private static final String REWRITE_SKIPPED_HIGH_CONFIDENCE = "skipped_high_confidence";
+    private static final String REWRITE_SKIPPED_DISABLED = "skipped_disabled";
+    private static final String REWRITE_SKIPPED_UNAVAILABLE = "skipped_unavailable";
+    private static final String REWRITE_SKIPPED_ERROR = "skipped_error";
+    private static final String REWRITE_SKIPPED_EMPTY_RESULT = "skipped_empty_result";
 
     private final RagProperties ragProperties;
-    private final CompressionQueryTransformer compressionQueryTransformer;
-    private final RewriteQueryTransformer rewriteQueryTransformer;
+    private final QueryTransformer compressionQueryTransformer;
+    private final QueryTransformer rewriteQueryTransformer;
+    private final RagQueryRewriteConfidenceEvaluator rewriteConfidenceEvaluator;
     private final RagOpenAiTokenCounter tokenCounter;
     private final RagRetrievalMetrics retrievalMetrics;
 
+    @Autowired
     public RagQueryTransformer(
             ObjectProvider<RewriteQueryTransformer> rewriteQueryTransformerProvider,
             ObjectProvider<CompressionQueryTransformer> compressionQueryTransformerProvider,
+            RagQueryRewriteConfidenceEvaluator rewriteConfidenceEvaluator,
+            RagProperties ragProperties,
+            RagOpenAiTokenCounter tokenCounter,
+            RagRetrievalMetrics retrievalMetrics
+    ) {
+        this(
+                resolveRewriteQueryTransformer(rewriteQueryTransformerProvider),
+                resolveCompressionQueryTransformer(compressionQueryTransformerProvider),
+                rewriteConfidenceEvaluator,
+                ragProperties,
+                tokenCounter,
+                retrievalMetrics
+        );
+    }
+
+    RagQueryTransformer(
+            QueryTransformer rewriteQueryTransformer,
+            QueryTransformer compressionQueryTransformer,
+            RagQueryRewriteConfidenceEvaluator rewriteConfidenceEvaluator,
             RagProperties ragProperties,
             RagOpenAiTokenCounter tokenCounter,
             RagRetrievalMetrics retrievalMetrics
@@ -47,11 +76,12 @@ public class RagQueryTransformer {
         this.ragProperties = ragProperties;
         this.tokenCounter = tokenCounter;
         this.retrievalMetrics = retrievalMetrics;
-        this.rewriteQueryTransformer = resolveRewriteQueryTransformer(rewriteQueryTransformerProvider);
-        this.compressionQueryTransformer = resolveCompressionQueryTransformer(compressionQueryTransformerProvider);
+        this.rewriteQueryTransformer = rewriteQueryTransformer;
+        this.compressionQueryTransformer = compressionQueryTransformer;
+        this.rewriteConfidenceEvaluator = rewriteConfidenceEvaluator;
     }
 
-    private RewriteQueryTransformer resolveRewriteQueryTransformer(
+    private static RewriteQueryTransformer resolveRewriteQueryTransformer(
             ObjectProvider<RewriteQueryTransformer> rewriteQueryTransformerProvider
     ) {
         try {
@@ -62,7 +92,7 @@ public class RagQueryTransformer {
         }
     }
 
-    private CompressionQueryTransformer resolveCompressionQueryTransformer(
+    private static CompressionQueryTransformer resolveCompressionQueryTransformer(
             ObjectProvider<CompressionQueryTransformer> compressionQueryTransformerProvider
     ) {
         try {
@@ -83,6 +113,7 @@ public class RagQueryTransformer {
         }
 
         Query workingQuery = new Query(normalizedQuestion, springAiHistory, Map.of());
+        RewriteOutcome rewriteOutcome = RewriteOutcome.skipped(workingQuery, REWRITE_SKIPPED_DISABLED, null, null);
         boolean modelUsed = false;
         boolean compressionApplied = false;
         boolean rewriteApplied = false;
@@ -94,9 +125,9 @@ public class RagQueryTransformer {
             compressionApplied = true;
         }
 
-        Query rewrittenQuery = applyRewrite(workingQuery);
-        if (rewrittenQuery != workingQuery) {
-            workingQuery = rewrittenQuery;
+        rewriteOutcome = applyRewrite(workingQuery);
+        if (rewriteOutcome.query() != workingQuery) {
+            workingQuery = rewriteOutcome.query();
             modelUsed = true;
             rewriteApplied = true;
         }
@@ -105,7 +136,16 @@ public class RagQueryTransformer {
         if (retrievalQuestion.isEmpty()) {
             log.warn("Query transformation returned empty retrieval question, falling back to original query.");
             retrievalMetrics.recordFallback("query_transform", "transform", "empty_result");
-            return new RagQueryTransformationResult(normalizedQuestion, normalizedQuestion, false, false, conversationTurns);
+            return new RagQueryTransformationResult(
+                    normalizedQuestion,
+                    normalizedQuestion,
+                    false,
+                    false,
+                    conversationTurns,
+                    rewriteOutcome.confidence(),
+                    rewriteOutcome.decision(),
+                    rewriteOutcome.reason()
+            );
         }
 
         boolean transformed = !retrievalQuestion.equals(normalizedQuestion);
@@ -118,7 +158,16 @@ public class RagQueryTransformer {
                 RagLogHelper.previewQuestion(normalizedQuestion),
                 RagLogHelper.previewQuestion(retrievalQuestion)
         );
-        return new RagQueryTransformationResult(normalizedQuestion, retrievalQuestion, transformed, modelUsed, conversationTurns);
+        return new RagQueryTransformationResult(
+                normalizedQuestion,
+                retrievalQuestion,
+                transformed,
+                modelUsed,
+                conversationTurns,
+                rewriteOutcome.confidence(),
+                rewriteOutcome.decision(),
+                rewriteOutcome.reason()
+        );
     }
 
     private Query applyCompression(Query query, int previousUserTurns, int conversationTurns) {
@@ -142,9 +191,47 @@ public class RagQueryTransformer {
         }
     }
 
-    private Query applyRewrite(Query query) {
-        if (!shouldApplyRewrite(query.text())) {
-            return query;
+    private RewriteOutcome applyRewrite(Query query) {
+        RewriteReadiness readiness = rewriteReadiness(query.text());
+        if (!readiness.ready()) {
+            return RewriteOutcome.skipped(query, readiness.decision(), null, readiness.reason());
+        }
+
+        RagQueryRewriteConfidenceResult confidence = null;
+        if (ragProperties.queryTransformation().rewriteConfidenceEnabled()) {
+            try {
+                confidence = rewriteConfidenceEvaluator.evaluate(query);
+            } catch (Exception exception) {
+                log.warn(
+                        "Query rewrite confidence evaluator failed, skipping rewrite: queryPreview={}, error={}",
+                        RagLogHelper.previewQuestion(query.text()),
+                        RagLogHelper.errorSummary(exception)
+                );
+                retrievalMetrics.recordFallback("query_transform", "rewrite_confidence", "error");
+                return RewriteOutcome.skipped(query, REWRITE_SKIPPED_ERROR, null, RagLogHelper.errorSummary(exception));
+            }
+            if (confidence == null) {
+                retrievalMetrics.recordFallback("query_transform", "rewrite_confidence", "null_response");
+                return RewriteOutcome.skipped(query, REWRITE_SKIPPED_ERROR, null, "null_response");
+            }
+            if (!confidence.available()) {
+                String fallbackReason = fallbackReason(confidence.fallbackReason());
+                String decision = "no_chat_model".equals(fallbackReason)
+                        || "not_configured".equals(fallbackReason)
+                        ? REWRITE_SKIPPED_UNAVAILABLE
+                        : REWRITE_SKIPPED_ERROR;
+                retrievalMetrics.recordFallback("query_transform", "rewrite_confidence", fallbackReason);
+                return RewriteOutcome.skipped(query, decision, null, confidence.reason() == null ? fallbackReason : confidence.reason());
+            }
+
+            if (confidence.confidence() >= ragProperties.queryTransformation().rewriteConfidenceThreshold()) {
+                return RewriteOutcome.skipped(
+                        query,
+                        REWRITE_SKIPPED_HIGH_CONFIDENCE,
+                        confidence.confidence(),
+                        confidence.reason()
+                );
+            }
         }
 
         try {
@@ -153,14 +240,33 @@ public class RagQueryTransformer {
             if (retrievalQuestion.isEmpty()) {
                 log.warn("RewriteQueryTransformer returned empty result, falling back to pre-rewrite query.");
                 retrievalMetrics.recordFallback("query_transform", "rewrite", "empty_result");
-                return query;
+                return RewriteOutcome.skipped(
+                        query,
+                        REWRITE_SKIPPED_EMPTY_RESULT,
+                        confidence == null ? null : confidence.confidence(),
+                        confidence == null ? "rewrite returned empty result" : confidence.reason()
+                );
             }
-            return new Query(retrievalQuestion, query.history(), query.context());
+            return new RewriteOutcome(
+                    new Query(retrievalQuestion, query.history(), query.context()),
+                    confidence == null ? null : confidence.confidence(),
+                    REWRITE_APPLIED_LOW_CONFIDENCE,
+                    confidence == null ? "rewrite confidence gate disabled; legacy rewrite applied" : confidence.reason()
+            );
         } catch (Exception exception) {
             log.warn("RewriteQueryTransformer failed, falling back to pre-rewrite query: error={}", RagLogHelper.errorSummary(exception));
             retrievalMetrics.recordFallback("query_transform", "rewrite", "error");
-            return query;
+            return RewriteOutcome.skipped(
+                    query,
+                    REWRITE_SKIPPED_ERROR,
+                    confidence == null ? null : confidence.confidence(),
+                    RagLogHelper.errorSummary(exception)
+            );
         }
+    }
+
+    private String fallbackReason(String reason) {
+        return reason == null || reason.isBlank() ? "unavailable" : reason;
     }
 
     private boolean shouldApplyCompression(String queryText, int previousUserTurns, int conversationTurns) {
@@ -190,12 +296,19 @@ public class RagQueryTransformer {
                 && previousUserTurns >= ragProperties.queryTransformation().minHistoryTurns());
     }
 
-    private boolean shouldApplyRewrite(String queryText) {
-        return ragProperties.queryTransformation().rewriteEnabled()
-                && ragProperties.queryTransformation().rewriteUseModel()
-                && this.rewriteQueryTransformer != null
-                && queryText != null
-                && !queryText.isBlank();
+    private RewriteReadiness rewriteReadiness(String queryText) {
+        if (!ragProperties.queryTransformation().rewriteEnabled()
+                || !ragProperties.queryTransformation().rewriteUseModel()
+                || queryText == null
+                || queryText.isBlank()) {
+            return new RewriteReadiness(false, REWRITE_SKIPPED_DISABLED, "rewrite disabled");
+        }
+        if (this.rewriteQueryTransformer == null
+                || (ragProperties.queryTransformation().rewriteConfidenceEnabled()
+                && this.rewriteConfidenceEvaluator == null)) {
+            return new RewriteReadiness(false, REWRITE_SKIPPED_UNAVAILABLE, "rewrite unavailable");
+        }
+        return new RewriteReadiness(true, null, null);
     }
 
     private int countPreviousUserTurns(List<RagConversationMessage> history) {
@@ -242,5 +355,23 @@ public class RagQueryTransformer {
 
     private int approximateTokenCount(String text) {
         return tokenCounter.count(text);
+    }
+
+    private record RewriteOutcome(
+            Query query,
+            Double confidence,
+            String decision,
+            String reason
+    ) {
+        private static RewriteOutcome skipped(Query query, String decision, Double confidence, String reason) {
+            return new RewriteOutcome(query, confidence, decision, reason);
+        }
+    }
+
+    private record RewriteReadiness(
+            boolean ready,
+            String decision,
+            String reason
+    ) {
     }
 }

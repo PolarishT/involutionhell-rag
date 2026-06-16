@@ -7,6 +7,7 @@ import com.involutionhell.backend.rag.retrieval.api.RagAskRequest;
 import com.involutionhell.backend.rag.retrieval.api.RagAskStartedView;
 import com.involutionhell.backend.rag.retrieval.api.RagAskStreamEvent;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
 import org.junit.jupiter.api.Test;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.MediaType;
@@ -24,13 +25,15 @@ class RagAskControllerTests {
                 .bindToController(new RagAskController(new FixedAskFacade()))
                 .build();
 
-        List<ServerSentEvent<String>> events = client.post()
-                .uri("/public/rag/ask")
-                .contentType(MediaType.APPLICATION_JSON)
+        List<ServerSentEvent<String>> events = client.get()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/public/rag/ask")
+                        .queryParam("userId", "user-001")
+                        .queryParam("conversationId", "conv-001")
+                        .queryParam("question", "怎么使用 RAG?")
+                        .queryParam("topK", 3)
+                        .build())
                 .accept(MediaType.TEXT_EVENT_STREAM)
-                .bodyValue("""
-                        {"userId":"user-001","conversationId":"conv-001","question":"怎么使用 RAG?","topK":3,"tags":[],"history":[]}
-                        """)
                 .exchange()
                 .expectStatus().isOk()
                 .expectHeader().contentTypeCompatibleWith(MediaType.TEXT_EVENT_STREAM)
@@ -46,40 +49,92 @@ class RagAskControllerTests {
     }
 
     @Test
-    void askEndpointRejectsInvalidRequest() {
+    void askEndpointBindsRepeatedTags() {
+        CapturingAskFacade facade = new CapturingAskFacade();
+        WebTestClient client = WebTestClient
+                .bindToController(new RagAskController(facade))
+                .build();
+
+        client.get()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/public/rag/ask")
+                        .queryParam("userId", "user-001")
+                        .queryParam("question", "过滤标签是否生效?")
+                        .queryParam("tags", "rag")
+                        .queryParam("tags", "java")
+                        .queryParam("sourceUriPrefix", "s3://docs/")
+                        .queryParam("headingPathContains", "API")
+                        .queryParam("requestId", "request-001")
+                        .build())
+                .accept(MediaType.TEXT_EVENT_STREAM)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentTypeCompatibleWith(MediaType.TEXT_EVENT_STREAM);
+
+        RagAskRequest request = facade.request.get();
+        assertThat(request).isNotNull();
+        assertThat(request.conversationId()).isNull();
+        assertThat(request.tags()).containsExactly("rag", "java");
+        assertThat(request.sourceUriPrefix()).isEqualTo("s3://docs/");
+        assertThat(request.headingPathContains()).isEqualTo("API");
+        assertThat(request.requestId()).isEqualTo("request-001");
+        assertThat(request.history()).isEmpty();
+    }
+
+    @Test
+    void askEndpointRejectsBlankQuestion() {
         WebTestClient client = WebTestClient
                 .bindToController(new RagAskController(new FixedAskFacade()))
                 .build();
 
-        client.post()
-                .uri("/public/rag/ask")
-                .contentType(MediaType.APPLICATION_JSON)
+        client.get()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/public/rag/ask")
+                        .queryParam("userId", "user-001")
+                        .queryParam("conversationId", "conv-001")
+                        .queryParam("question", "")
+                        .queryParam("topK", 3)
+                        .build())
                 .accept(MediaType.TEXT_EVENT_STREAM)
-                .bodyValue("""
-                        {"userId":"user-001","conversationId":"conv-001","question":"","topK":3}
-                        """)
                 .exchange()
                 .expectStatus().isBadRequest();
     }
 
     @Test
-    void askEndpointRejectsMissingUserIdAndConversationId() {
+    void askEndpointRejectsMissingUserId() {
         WebTestClient client = WebTestClient
                 .bindToController(new RagAskController(new FixedAskFacade()))
                 .build();
 
-        client.post()
-                .uri("/public/rag/ask")
-                .contentType(MediaType.APPLICATION_JSON)
+        client.get()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/public/rag/ask")
+                        .queryParam("question", "问题")
+                        .queryParam("topK", 3)
+                        .build())
                 .accept(MediaType.TEXT_EVENT_STREAM)
-                .bodyValue("""
-                        {"question":"问题","topK":3}
-                        """)
                 .exchange()
                 .expectStatus().isBadRequest();
     }
 
-    private static final class FixedAskFacade implements RagAskFacade {
+    @Test
+    void askEndpointRejectsTopKOutOfRange() {
+        WebTestClient client = WebTestClient
+                .bindToController(new RagAskController(new FixedAskFacade()))
+                .build();
+
+        client.get()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/public/rag/ask")
+                        .queryParam("userId", "user-001")
+                        .queryParam("question", "问题")
+                        .queryParam("topK", 11)
+                        .build())
+                .exchange()
+                .expectStatus().isBadRequest();
+    }
+
+    private static class FixedAskFacade implements RagAskFacade {
 
         @Override
         public Flux<RagAskStreamEvent> askStream(RagAskRequest request) {
@@ -89,7 +144,12 @@ class RagAskControllerTests {
                             "1",
                             "started",
                             correlationId,
-                            new RagAskStartedView(correlationId, request.question(), request.topK())
+                            new RagAskStartedView(
+                                    correlationId,
+                                    "conv-001",
+                                    request.question(),
+                                    request.topK() == null ? 3 : request.topK()
+                            )
                     ),
                     new RagAskStreamEvent(
                             "2",
@@ -104,6 +164,17 @@ class RagAskControllerTests {
                             new RagAskCompletedView(false, false, List.of(), 0)
                     )
             );
+        }
+    }
+
+    private static final class CapturingAskFacade extends FixedAskFacade {
+
+        private final AtomicReference<RagAskRequest> request = new AtomicReference<>();
+
+        @Override
+        public Flux<RagAskStreamEvent> askStream(RagAskRequest request) {
+            this.request.set(request);
+            return super.askStream(request);
         }
     }
 }

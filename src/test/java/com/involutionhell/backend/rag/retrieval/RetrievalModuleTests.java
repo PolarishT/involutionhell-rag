@@ -2,6 +2,7 @@ package com.involutionhell.backend.rag.retrieval;
 
 import com.involutionhell.backend.rag.retrieval.api.RagAskFacade;
 import com.involutionhell.backend.rag.retrieval.api.RagAskRequest;
+import com.involutionhell.backend.rag.retrieval.api.RagAskStartedView;
 import com.involutionhell.backend.rag.retrieval.api.RagConversationUpdateRequest;
 import com.involutionhell.backend.rag.retrieval.application.RagConversationService;
 import org.junit.jupiter.api.BeforeEach;
@@ -237,8 +238,8 @@ class RetrievalModuleTests {
     }
 
     @Test
-    void askRejectsMissingConversation() {
-        assertThatThrownBy(() -> ragAskFacade.askStream(new RagAskRequest(
+    void askCreatesProvidedMissingConversation() {
+        var events = ragAskFacade.askStream(new RagAskRequest(
                 "user-001",
                 "missing-conv",
                 "问题",
@@ -247,8 +248,51 @@ class RetrievalModuleTests {
                 List.of(),
                 null,
                 List.of()
-        )).collectList().block())
-                .hasMessageContaining("404 NOT_FOUND");
+        )).collectList().block();
+
+        assertThat(events).isNotNull();
+        assertThat(events.getFirst().data())
+                .isInstanceOfSatisfying(RagAskStartedView.class, started -> {
+                    assertThat(started.conversationId()).isEqualTo("missing-conv");
+                    assertThat(started.question()).isEqualTo("问题");
+                });
+        assertThat(jdbc.queryForObject(
+                "SELECT COUNT(*) FROM rag_conversations WHERE conversation_id = ? AND user_id = ?",
+                Integer.class,
+                "missing-conv",
+                "user-001"
+        )).isEqualTo(1);
+        assertThat(jdbc.queryForObject(
+                "SELECT title FROM rag_conversations WHERE conversation_id = ?",
+                String.class,
+                "missing-conv"
+        )).isEqualTo("问题");
+    }
+
+    @Test
+    void askCreatesGeneratedConversationWhenConversationIdIsMissing() {
+        var events = ragAskFacade.askStream(new RagAskRequest(
+                "user-001",
+                null,
+                "这是一个自动创建会话的问题，标题应该被截断前缀",
+                3,
+                null,
+                List.of(),
+                null,
+                List.of()
+        )).collectList().block();
+
+        assertThat(events).isNotNull();
+        assertThat(events.getFirst().data())
+                .isInstanceOfSatisfying(RagAskStartedView.class, started -> {
+                    assertThat(started.conversationId()).startsWith("conv:");
+                    assertThat(started.question()).isEqualTo("这是一个自动创建会话的问题，标题应该被截断前缀");
+                });
+        assertThat(jdbc.queryForObject(
+                "SELECT COUNT(*) FROM rag_conversations WHERE user_id = ?",
+                Integer.class,
+                "user-001"
+        )).isEqualTo(2);
     }
 
     @Test

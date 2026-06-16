@@ -10,6 +10,7 @@ import com.involutionhell.backend.rag.indexing.workflow.IndexWorkflowTriggerType
 import com.involutionhell.backend.rag.shared.support.RagLogHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
@@ -35,12 +36,12 @@ public class RagDirectIndexEventPublisher implements RagIndexEventPublisher {
             RagIndexingService ragIndexingService,
             IndexWorkflowService workflowService,
             RagIndexingFailureClassifier failureClassifier,
-            @Qualifier("ragVirtualThreadExecutor") Executor ragVirtualThreadExecutor
+            @Qualifier("ragVirtualThreadExecutor") ObjectProvider<Executor> ragVirtualThreadExecutorProvider
     ) {
         this.ragIndexingService = ragIndexingService;
         this.workflowService = workflowService;
         this.failureClassifier = failureClassifier;
-        this.ragVirtualThreadExecutor = ragVirtualThreadExecutor;
+        this.ragVirtualThreadExecutor = ragVirtualThreadExecutorProvider.getIfAvailable(() -> Runnable::run);
     }
 
     @Override

@@ -43,7 +43,7 @@ class IndexingCommandService implements IndexingCommandFacade {
             RagIndexingService ragIndexingService,
             DocumentIndexingSpi documentIndexingSpi,
             RagProperties ragProperties,
-            @Qualifier("ragVirtualThreadExecutor") Executor ragVirtualThreadExecutor,
+            @Qualifier("ragVirtualThreadExecutor") ObjectProvider<Executor> ragVirtualThreadExecutorProvider,
             RagIndexingMetrics indexingMetrics
     ) {
         this.indexOutboxServiceProvider = indexOutboxServiceProvider;
@@ -52,7 +52,7 @@ class IndexingCommandService implements IndexingCommandFacade {
         this.ragIndexingService = ragIndexingService;
         this.documentIndexingSpi = documentIndexingSpi;
         this.ragProperties = ragProperties;
-        this.ragVirtualThreadExecutor = ragVirtualThreadExecutor;
+        this.ragVirtualThreadExecutor = ragVirtualThreadExecutorProvider.getIfAvailable(() -> Runnable::run);
         this.indexingMetrics = indexingMetrics;
     }
 

@@ -29,6 +29,8 @@ import org.springframework.ai.document.Document;
 import org.springframework.ai.vectorstore.SearchRequest;
 import org.springframework.ai.vectorstore.milvus.MilvusSearchRequest;
 import org.springframework.ai.vectorstore.milvus.MilvusVectorStore;
+import org.springframework.beans.factory.ObjectProvider;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -54,6 +56,7 @@ public class RagMilvusRetriever implements RagRetriever {
     private final RagRetrievalMetrics retrievalMetrics;
     private final Executor ragVirtualThreadExecutor;
 
+    @Autowired
     public RagMilvusRetriever(
             MilvusVectorStore vectorStore,
             IndexingChunkQueryFacade indexingChunkQueryFacade,
@@ -62,7 +65,29 @@ public class RagMilvusRetriever implements RagRetriever {
             RagChunkMetadataHelper metadataHelper,
             RagMilvusNativeExpressionBuilder nativeExpressionBuilder,
             RagRetrievalMetrics retrievalMetrics,
-            @Qualifier("ragVirtualThreadExecutor") Executor ragVirtualThreadExecutor
+            @Qualifier("ragVirtualThreadExecutor") ObjectProvider<Executor> ragVirtualThreadExecutorProvider
+    ) {
+        this(
+                vectorStore,
+                indexingChunkQueryFacade,
+                ragProperties,
+                retrievalScorer,
+                metadataHelper,
+                nativeExpressionBuilder,
+                retrievalMetrics,
+                ragVirtualThreadExecutorProvider.getIfAvailable(() -> Runnable::run)
+        );
+    }
+
+    public RagMilvusRetriever(
+            MilvusVectorStore vectorStore,
+            IndexingChunkQueryFacade indexingChunkQueryFacade,
+            RagProperties ragProperties,
+            RagRetrievalScorer retrievalScorer,
+            RagChunkMetadataHelper metadataHelper,
+            RagMilvusNativeExpressionBuilder nativeExpressionBuilder,
+            RagRetrievalMetrics retrievalMetrics,
+            Executor ragVirtualThreadExecutor
     ) {
         this.vectorStore = vectorStore;
         this.indexingChunkQueryFacade = indexingChunkQueryFacade;

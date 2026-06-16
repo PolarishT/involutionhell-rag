@@ -22,6 +22,8 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.ObjectProvider;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
@@ -40,13 +42,32 @@ public class KeywordRagRetriever implements RagRetriever {
     private final RagRetrievalMetrics retrievalMetrics;
     private final Executor ragVirtualThreadExecutor;
 
+    @Autowired
     public KeywordRagRetriever(
             IndexingChunkQueryFacade indexingChunkQueryFacade,
             RagRetrievalScorer retrievalScorer,
             RagChunkMetadataHelper metadataHelper,
             RagProperties ragProperties,
             RagRetrievalMetrics retrievalMetrics,
-            @Qualifier("ragVirtualThreadExecutor") Executor ragVirtualThreadExecutor
+            @Qualifier("ragVirtualThreadExecutor") ObjectProvider<Executor> ragVirtualThreadExecutorProvider
+    ) {
+        this(
+                indexingChunkQueryFacade,
+                retrievalScorer,
+                metadataHelper,
+                ragProperties,
+                retrievalMetrics,
+                ragVirtualThreadExecutorProvider.getIfAvailable(() -> Runnable::run)
+        );
+    }
+
+    public KeywordRagRetriever(
+            IndexingChunkQueryFacade indexingChunkQueryFacade,
+            RagRetrievalScorer retrievalScorer,
+            RagChunkMetadataHelper metadataHelper,
+            RagProperties ragProperties,
+            RagRetrievalMetrics retrievalMetrics,
+            Executor ragVirtualThreadExecutor
     ) {
         this.indexingChunkQueryFacade = indexingChunkQueryFacade;
         this.retrievalScorer = retrievalScorer;

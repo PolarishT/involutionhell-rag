@@ -1,5 +1,7 @@
 package com.involutionhell.backend.rag.shared.properties;
 
+import jakarta.validation.constraints.DecimalMax;
+import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -191,6 +193,10 @@ public record RagProperties(
      * @param rewriteUseModel 是否调用模型执行 rewrite
      * @param rewriteQueryTemplate 自定义 rewrite 提示词模板
      * @param rewriteTargetSearchSystem Spring AI RewriteQueryTransformer 的 target search system 配置
+     * @param rewriteConfidenceEnabled 是否启用 rewrite 前的模型置信度门控
+     * @param rewriteConfidenceThreshold 低于该置信度时才触发 rewrite
+     * @param rewriteConfidenceTimeoutMillis rewrite confidence 判定超时，单位毫秒
+     * @param rewriteConfidencePromptTemplate 自定义 rewrite confidence 判定提示词模板
      */
     public record QueryTransformation(
             @DefaultValue("true")
@@ -237,10 +243,43 @@ public record RagProperties(
             String rewriteQueryTemplate,
 
             @DefaultValue("")
-            String rewriteTargetSearchSystem
+            String rewriteTargetSearchSystem,
+
+            @DefaultValue("true")
+            boolean rewriteConfidenceEnabled,
+
+            @DefaultValue("0.65")
+            @DecimalMin("0.0")
+            @DecimalMax("1.0")
+            double rewriteConfidenceThreshold,
+
+            @DefaultValue("1000")
+            @Min(0)
+            @Max(120_000)
+            long rewriteConfidenceTimeoutMillis,
+
+            @DefaultValue("")
+            String rewriteConfidencePromptTemplate
     ) {
         public static QueryTransformation defaults() {
-            return new QueryTransformation(true, true, 3, "", 0, 0, 0, 2_000L, true, true, "", "");
+            return new QueryTransformation(
+                    true,
+                    true,
+                    3,
+                    "",
+                    0,
+                    0,
+                    0,
+                    2_000L,
+                    true,
+                    true,
+                    "",
+                    "",
+                    true,
+                    0.65d,
+                    1_000L,
+                    ""
+            );
         }
     }
 

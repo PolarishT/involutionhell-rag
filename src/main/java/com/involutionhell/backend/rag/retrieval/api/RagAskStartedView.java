@@ -5,6 +5,7 @@ package com.involutionhell.backend.rag.retrieval.api;
  */
 public record RagAskStartedView(
         String correlationId,
+        String conversationId,
         String question,
         int topK
 ) {
