@@ -1,0 +1,134 @@
+name: Build and Push Native Image
+
+on:
+  # 允许在 GitHub Actions 页面手动执行
+  workflow_dispatch:
+
+  # main 分支相关代码变化时自动构建
+  push:
+    branches:
+      - main
+    paths:
+      - "src/**"
+      - "pom.xml"
+      - "mvnw"
+      - "mvnw.cmd"
+      - ".mvn/**"
+      - ".github/workflows/build-native-image.yml"
+
+permissions:
+  contents: read
+
+# 同一分支有新的构建时，取消旧的 Native 构建，节省时间
+concurrency:
+  group: native-image-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-native-image:
+    name: Build Native Image
+    runs-on: ubuntu-24.04
+
+    # Native Image 构建较慢，避免无限运行
+    timeout-minutes: 90
+
+    env:
+      IMAGE_REPOSITORY: registry.digitalocean.com/${{ secrets.DO_REGISTRY_NAME }}/rag-server
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Set up Java 25
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: "25"
+          cache: maven
+
+      - name: Validate required secrets
+        shell: bash
+        run: |
+          if [ -z "${{ secrets.DO_REGISTRY_NAME }}" ]; then
+            echo "::error::Missing GitHub secret: DO_REGISTRY_NAME"
+            exit 1
+          fi
+
+          if [ -z "${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}" ]; then
+            echo "::error::Missing GitHub secret: DIGITALOCEAN_ACCESS_TOKEN"
+            exit 1
+          fi
+
+      - name: Verify build environment
+        run: |
+          java -version
+          docker version
+          uname -a
+
+      - name: Make Maven Wrapper executable
+        run: chmod +x ./mvnw
+
+      - name: Generate image metadata
+        id: metadata
+        shell: bash
+        run: |
+          SHORT_SHA="${GITHUB_SHA::7}"
+          IMAGE="${IMAGE_REPOSITORY}:${SHORT_SHA}"
+
+          echo "short_sha=${SHORT_SHA}" >> "$GITHUB_OUTPUT"
+          echo "image=${IMAGE}" >> "$GITHUB_OUTPUT"
+
+          echo "Building image: ${IMAGE}"
+
+      - name: Log in to DigitalOcean Container Registry
+        shell: bash
+        run: |
+          echo "${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}" |
+            docker login registry.digitalocean.com \
+              --username "${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}" \
+              --password-stdin
+
+      - name: Build Spring Boot native image
+        shell: bash
+        run: |
+          ./mvnw \
+            --batch-mode \
+            --no-transfer-progress \
+            -Pnative \
+            -DskipTests \
+            spring-boot:build-image \
+            -Dspring-boot.build-image.imageName="${{ steps.metadata.outputs.image }}"
+
+      - name: Inspect generated image
+        shell: bash
+        run: |
+          docker image inspect \
+            "${{ steps.metadata.outputs.image }}" \
+            --format='Image={{index .RepoTags 0}} OS={{.Os}} Architecture={{.Architecture}} Size={{.Size}}'
+
+      - name: Push immutable commit image
+        run: |
+          docker push "${{ steps.metadata.outputs.image }}"
+
+      - name: Push latest image
+        shell: bash
+        run: |
+          docker tag \
+            "${{ steps.metadata.outputs.image }}" \
+            "${IMAGE_REPOSITORY}:latest"
+
+          docker push "${IMAGE_REPOSITORY}:latest"
+
+      - name: Write build summary
+        shell: bash
+        run: |
+          {
+            echo "## Native Image Build Completed 🚀"
+            echo ""
+            echo "| Item | Value |"
+            echo "|---|---|"
+            echo "| Commit | \`${GITHUB_SHA}\` |"
+            echo "| Immutable image | \`${{ steps.metadata.outputs.image }}\` |"
+            echo "| Latest image | \`${IMAGE_REPOSITORY}:latest\` |"
+            echo "| Runner architecture | \`linux/amd64\` |"
+          } >> "$GITHUB_STEP_SUMMARY"
