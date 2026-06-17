@@ -153,11 +153,6 @@ jobs:
           doctl kubernetes cluster kubeconfig save \
             "${{ secrets.DO_CLUSTER_NAME }}"
 
-      - name: Deploy Kubernetes manifests
-        shell: bash
-        run: |
-          kubectl apply -f k8s/rag-server-dev.yaml
-
       - name: Restart deployment to pull latest image
         shell: bash
         run: |
