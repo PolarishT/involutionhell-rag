@@ -142,3 +142,42 @@ jobs:
             echo "| Builder | \`paketobuildpacks/builder-jammy-java-tiny\` |"
             echo "| Native build | \`BP_NATIVE_IMAGE=true\` |"
           } >> "$GITHUB_STEP_SUMMARY"
+      - name: Install doctl
+        uses: digitalocean/action-doctl@v2
+        with:
+          token: ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}
+
+      - name: Save Kubernetes credentials
+        shell: bash
+        run: |
+          doctl kubernetes cluster kubeconfig save \
+            "${{ secrets.DO_CLUSTER_NAME }}"
+
+      - name: Deploy Kubernetes manifests
+        shell: bash
+        run: |
+          kubectl apply -f k8s/rag-server-dev.yaml
+
+      - name: Restart deployment to pull latest image
+        shell: bash
+        run: |
+          kubectl -n interview rollout restart deployment/rag-server
+
+      - name: Wait for rollout
+        shell: bash
+        run: |
+          kubectl -n interview rollout status deployment/rag-server \
+            --timeout=300s
+
+      - name: Show deployed image
+        shell: bash
+        run: |
+          kubectl -n interview get deployment rag-server \
+            -o jsonpath='{.spec.template.spec.containers[0].image}{"\n"}'
+
+      - name: Show pods
+        shell: bash
+        run: |
+          kubectl -n interview get pods \
+            -l app=rag-server \
+            -o wide
