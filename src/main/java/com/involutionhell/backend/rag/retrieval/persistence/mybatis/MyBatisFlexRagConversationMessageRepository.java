@@ -1,11 +1,14 @@
 package com.involutionhell.backend.rag.retrieval.persistence.mybatis;
 
+import com.involutionhell.backend.rag.retrieval.persistence.RagConversationMessageCursor;
+import com.involutionhell.backend.rag.retrieval.persistence.RagConversationMessagePage;
 import com.involutionhell.backend.rag.retrieval.persistence.RagConversationMessageRecord;
 import com.involutionhell.backend.rag.retrieval.persistence.RagConversationMessageRepository;
 import com.mybatisflex.core.query.QueryChain;
 import com.mybatisflex.core.query.RawQueryColumn;
 import com.mybatisflex.core.row.DbChain;
 import com.mybatisflex.core.update.UpdateChain;
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.UUID;
@@ -54,11 +57,45 @@ public class MyBatisFlexRagConversationMessageRepository implements RagConversat
     public List<RagConversationMessageRecord> findByConversationId(Long conversationId) {
         return QueryChain.of(messageMapper)
                 .where("conversation_id = ?", conversationId)
+                .and("role IN (?, ?)", "user", "assistant")
                 .orderBy("sequence_no ASC")
                 .list()
                 .stream()
                 .map(this::toRecord)
                 .toList();
+    }
+
+    @Override
+    public RagConversationMessagePage findByConversationId(
+            Long conversationId,
+            int limit,
+            RagConversationMessageCursor cursor
+    ) {
+        QueryChain<RagConversationMessageEntity> query = QueryChain.of(messageMapper)
+                .where("conversation_id = ?", conversationId)
+                .and("role IN (?, ?)", "user", "assistant");
+        if (cursor != null && cursor.id() != null) {
+            query.and("""
+                    (
+                         sequence_no > ?
+                      OR (sequence_no = ? AND id > ?)
+                    )
+                    """, cursor.sequenceNo(), cursor.sequenceNo(), cursor.id());
+        }
+        List<RagConversationMessageRecord> rows = query
+                .orderBy("sequence_no ASC", "id ASC")
+                .limit(limit + 1)
+                .list()
+                .stream()
+                .map(this::toRecord)
+                .collect(java.util.stream.Collectors.toCollection(ArrayList::new));
+        RagConversationMessageCursor nextCursor = null;
+        if (rows.size() > limit) {
+            RagConversationMessageRecord last = rows.get(limit - 1);
+            nextCursor = new RagConversationMessageCursor(last.sequenceNo(), last.id());
+            rows = new ArrayList<>(rows.subList(0, limit));
+        }
+        return new RagConversationMessagePage(rows, nextCursor);
     }
 
     @Override

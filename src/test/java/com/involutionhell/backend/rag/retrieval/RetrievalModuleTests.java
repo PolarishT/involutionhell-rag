@@ -182,7 +182,10 @@ class RetrievalModuleTests {
         assertThat(messages).hasSize(2);
         assertThat(messages.get(0).role()).isEqualTo("user");
         assertThat(messages.get(1).role()).isEqualTo("assistant");
-        assertThat(messages.get(1).status()).isEqualTo("FAILED");
+        assertThat(jdbc.queryForObject(
+                "SELECT status FROM rag_conversation_messages WHERE role = 'assistant'",
+                String.class
+        )).isEqualTo("FAILED");
         assertThat(messages.get(1).content()).contains("retrieval broke");
     }
 
@@ -318,11 +321,15 @@ class RetrievalModuleTests {
         );
 
         assertThat(updated.title()).isEqualTo("RAG 检索链路讨论");
-        assertThat(updated.status()).isEqualTo("ARCHIVED");
+        assertThat(jdbc.queryForObject(
+                "SELECT status FROM rag_conversations WHERE conversation_id = ?",
+                String.class,
+                "conv-001"
+        )).isEqualTo("ARCHIVED");
         assertThat(conversationService.getMessages("user-001", "conv-001").messages()).isEmpty();
 
         var page = conversationService.listConversations("user-001", 20, null);
-        assertThat(page.items()).extracting("conversationId").containsExactly("conv-001");
+        assertThat(page.conversations()).extracting("conversationId").containsExactly("conv-001");
         assertThat(page.nextCursor()).isNull();
     }
 

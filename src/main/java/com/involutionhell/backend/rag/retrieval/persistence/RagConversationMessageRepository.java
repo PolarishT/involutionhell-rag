@@ -14,6 +14,8 @@ public interface RagConversationMessageRepository {
 
     List<RagConversationMessageRecord> findByConversationId(Long conversationId);
 
+    RagConversationMessagePage findByConversationId(Long conversationId, int limit, RagConversationMessageCursor cursor);
+
     List<RagConversationMessageRecord> findRecentByConversationId(Long conversationId, int limit);
 
     RagConversationMessageRecord findById(Long id);

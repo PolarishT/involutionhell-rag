@@ -1,6 +1,7 @@
 package com.involutionhell.backend.rag.infrastructure.nativeimage;
 
 import com.involutionhell.backend.rag.common.api.ApiResponse;
+import com.involutionhell.backend.rag.common.api.DataResponse;
 import com.involutionhell.backend.rag.document.api.RagDocumentCreateRequest;
 import com.involutionhell.backend.rag.document.api.RagDocumentUpdateRequest;
 import com.involutionhell.backend.rag.document.api.RagDocumentView;
@@ -13,7 +14,12 @@ import com.involutionhell.backend.rag.indexing.messaging.RagIndexMessage;
 import com.involutionhell.backend.rag.retrieval.api.RagAnswerResponse;
 import com.involutionhell.backend.rag.retrieval.api.RagAskRequest;
 import com.involutionhell.backend.rag.retrieval.api.RagContextView;
+import com.involutionhell.backend.rag.retrieval.api.RagConversationListView;
 import com.involutionhell.backend.rag.retrieval.api.RagConversationMessage;
+import com.involutionhell.backend.rag.retrieval.api.RagConversationMessageView;
+import com.involutionhell.backend.rag.retrieval.api.RagConversationMessagesView;
+import com.involutionhell.backend.rag.retrieval.api.RagConversationSummaryView;
+import com.involutionhell.backend.rag.retrieval.api.RagConversationUpdateRequest;
 import com.involutionhell.backend.rag.retrieval.api.RagResponseNoticeView;
 import com.involutionhell.backend.rag.shared.properties.RagProperties;
 import org.springframework.aot.hint.BindingReflectionHintsRegistrar;
@@ -40,6 +46,7 @@ public class RagRuntimeHints implements RuntimeHintsRegistrar {
         BINDING_HINTS.registerReflectionHints(
                 hints.reflection(),
                 ApiResponse.class,
+                DataResponse.class,
                 RagAskRequest.class,
                 RagDocumentCreateRequest.class,
                 RagDocumentUpdateRequest.class,
@@ -49,7 +56,12 @@ public class RagRuntimeHints implements RuntimeHintsRegistrar {
                 RagIndexTimelineDocumentView.class,
                 RagIndexTimelineView.class,
                 RagContextView.class,
+                RagConversationListView.class,
                 RagConversationMessage.class,
+                RagConversationMessageView.class,
+                RagConversationMessagesView.class,
+                RagConversationSummaryView.class,
+                RagConversationUpdateRequest.class,
                 RagResponseNoticeView.class,
                 RagIndexOutboxView.class,
                 RagIndexTransitionView.class,
@@ -94,6 +106,8 @@ public class RagRuntimeHints implements RuntimeHintsRegistrar {
                 "com.involutionhell.backend.rag.indexing.persistence.RagIndexOutboxRecord",
                 "com.involutionhell.backend.rag.retrieval.persistence.RagAskRunRecord",
                 "com.involutionhell.backend.rag.retrieval.persistence.RagConversationCursor",
+                "com.involutionhell.backend.rag.retrieval.persistence.RagConversationMessageCursor",
+                "com.involutionhell.backend.rag.retrieval.persistence.RagConversationMessagePage",
                 "com.involutionhell.backend.rag.retrieval.persistence.RagConversationMessageRecord",
                 "com.involutionhell.backend.rag.retrieval.persistence.RagConversationPage",
                 "com.involutionhell.backend.rag.retrieval.persistence.RagConversationRecord",

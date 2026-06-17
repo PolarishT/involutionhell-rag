@@ -11,6 +11,8 @@ import com.involutionhell.backend.rag.retrieval.api.RagResponseNoticeView;
 import com.involutionhell.backend.rag.retrieval.persistence.RagAskRunRepository;
 import com.involutionhell.backend.rag.retrieval.persistence.RagAskRunRecord;
 import com.involutionhell.backend.rag.retrieval.persistence.RagConversationCursor;
+import com.involutionhell.backend.rag.retrieval.persistence.RagConversationMessageCursor;
+import com.involutionhell.backend.rag.retrieval.persistence.RagConversationMessagePage;
 import com.involutionhell.backend.rag.retrieval.persistence.RagConversationMessageRecord;
 import com.involutionhell.backend.rag.retrieval.persistence.RagConversationMessageRepository;
 import com.involutionhell.backend.rag.retrieval.persistence.RagConversationPage;
@@ -244,14 +246,28 @@ public class RagConversationService {
     }
 
     public RagConversationMessagesView getMessages(String userId, String conversationId) {
+        return getMessages(userId, conversationId, null, null);
+    }
+
+    public RagConversationMessagesView getMessages(String userId, String conversationId, Integer limit, String cursor) {
         requireText(userId, "userId 不能为空");
         requireText(conversationId, "conversationId 不能为空");
+        int pageLimit = normalizeLimit(limit);
         RagConversationRecord conversation = requireOwnedConversation(userId, conversationId, false);
-        List<RagConversationMessageView> messages = messageRepository.findByConversationId(conversation.id())
+        RagConversationMessagePage page = messageRepository.findByConversationId(
+                conversation.id(),
+                pageLimit,
+                decodeMessageCursor(cursor)
+        );
+        List<RagConversationMessageView> messages = page.items()
                 .stream()
                 .map(this::toMessageView)
                 .toList();
-        return new RagConversationMessagesView(conversation.conversationId(), conversation.userId(), messages);
+        return new RagConversationMessagesView(
+                conversation.conversationId(),
+                messages,
+                encodeMessageCursor(page.nextCursor())
+        );
     }
 
     @Transactional(rollbackFor = Exception.class)
@@ -410,13 +426,9 @@ public class RagConversationService {
     private RagConversationSummaryView toSummaryView(RagConversationRecord conversation) {
         return new RagConversationSummaryView(
                 conversation.conversationId(),
-                conversation.userId(),
                 conversation.title(),
-                conversation.status(),
-                conversation.messageCount(),
                 conversation.createdAt(),
-                conversation.updatedAt(),
-                conversation.lastMessageAt()
+                conversation.updatedAt()
         );
     }
 
@@ -425,8 +437,6 @@ public class RagConversationService {
                 message.messageId(),
                 message.role(),
                 message.content(),
-                message.status(),
-                message.sequenceNo(),
                 message.createdAt()
         );
     }
@@ -463,12 +473,45 @@ public class RagConversationService {
         }
     }
 
+    private RagConversationMessageCursor decodeMessageCursor(String cursor) {
+        if (!StringUtils.hasText(cursor)) {
+            return null;
+        }
+        try {
+            String json = new String(Base64.getUrlDecoder().decode(cursor), StandardCharsets.UTF_8);
+            Map<String, Object> value = jsonCodec.readMap(json);
+            Object sequenceNo = value.get("sequenceNo");
+            Object id = value.get("id");
+            if (sequenceNo == null || id == null) {
+                throw new IllegalArgumentException("cursor missing sequenceNo or id");
+            }
+            return new RagConversationMessageCursor(
+                    Integer.parseInt(String.valueOf(sequenceNo)),
+                    Long.valueOf(String.valueOf(id))
+            );
+        } catch (Exception exception) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "cursor 不合法", exception);
+        }
+    }
+
     private String encodeCursor(RagConversationCursor cursor) {
         if (cursor == null) {
             return null;
         }
         Map<String, Object> value = new LinkedHashMap<>();
         value.put("lastMessageAt", cursor.lastMessageAt() == null ? null : cursor.lastMessageAt().toString());
+        value.put("id", cursor.id());
+        return Base64.getUrlEncoder()
+                .withoutPadding()
+                .encodeToString(jsonCodec.write(value).getBytes(StandardCharsets.UTF_8));
+    }
+
+    private String encodeMessageCursor(RagConversationMessageCursor cursor) {
+        if (cursor == null) {
+            return null;
+        }
+        Map<String, Object> value = new LinkedHashMap<>();
+        value.put("sequenceNo", cursor.sequenceNo());
         value.put("id", cursor.id());
         return Base64.getUrlEncoder()
                 .withoutPadding()

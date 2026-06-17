@@ -1,6 +1,6 @@
 package com.involutionhell.backend.rag.retrieval.web;
 
-import com.involutionhell.backend.rag.common.api.ApiResponse;
+import com.involutionhell.backend.rag.common.api.DataResponse;
 import com.involutionhell.backend.rag.retrieval.api.RagConversationListView;
 import com.involutionhell.backend.rag.retrieval.api.RagConversationMessagesView;
 import com.involutionhell.backend.rag.retrieval.api.RagConversationSummaryView;
@@ -32,27 +32,29 @@ public class RagConversationController {
     }
 
     @GetMapping
-    public ApiResponse<RagConversationListView> listConversations(
+    public DataResponse<RagConversationListView> listConversations(
             @RequestParam @NotBlank(message = "userId 不能为空") String userId,
             @RequestParam(required = false) @Min(1) @Max(100) Integer limit,
             @RequestParam(required = false) String cursor
     ) {
-        return ApiResponse.ok(conversationService.listConversations(userId, limit, cursor));
+        return DataResponse.of(conversationService.listConversations(userId, limit, cursor));
     }
 
     @GetMapping("/{conversationId}/messages")
-    public ApiResponse<RagConversationMessagesView> getMessages(
+    public DataResponse<RagConversationMessagesView> getMessages(
             @PathVariable @NotBlank(message = "conversationId 不能为空") String conversationId,
-            @RequestParam @NotBlank(message = "userId 不能为空") String userId
+            @RequestParam @NotBlank(message = "userId 不能为空") String userId,
+            @RequestParam(required = false) @Min(1) @Max(100) Integer limit,
+            @RequestParam(required = false) String cursor
     ) {
-        return ApiResponse.ok(conversationService.getMessages(userId, conversationId));
+        return DataResponse.of(conversationService.getMessages(userId, conversationId, limit, cursor));
     }
 
     @PostMapping(value = "/{conversationId}/update", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public ApiResponse<RagConversationSummaryView> updateConversation(
+    public DataResponse<RagConversationSummaryView> updateConversation(
             @PathVariable @NotBlank(message = "conversationId 不能为空") String conversationId,
             @Valid @RequestBody RagConversationUpdateRequest request
     ) {
-        return ApiResponse.ok(conversationService.updateConversation(conversationId, request));
+        return DataResponse.of(conversationService.updateConversation(conversationId, request));
     }
 }
