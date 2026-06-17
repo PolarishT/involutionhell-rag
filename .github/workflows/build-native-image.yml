@@ -1,10 +1,8 @@
 name: Build and Push Native Image
 
 on:
-  # 允许在 GitHub Actions 页面手动执行
   workflow_dispatch:
 
-  # main 分支相关代码变化时自动构建
   push:
     branches:
       - main
@@ -19,7 +17,6 @@ on:
 permissions:
   contents: read
 
-# 同一分支有新的构建时，取消旧的 Native 构建，节省时间
 concurrency:
   group: native-image-${{ github.ref }}
   cancel-in-progress: true
@@ -28,12 +25,10 @@ jobs:
   build-native-image:
     name: Build Native Image
     runs-on: ubuntu-24.04
-
-    # Native Image 构建较慢，避免无限运行
     timeout-minutes: 90
 
     env:
-      IMAGE_REPOSITORY: registry.digitalocean.com/${{ secrets.DO_REGISTRY_NAME }}/rag-server
+      IMAGE_REPOSITORY: ${{ secrets.DOCKERHUB_USERNAME }}/unsw-opensource
 
     steps:
       - name: Checkout repository
@@ -50,19 +45,33 @@ jobs:
 
       - name: Validate required secrets
         shell: bash
+        env:
+          DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+          DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
+          DIGITALOCEAN_ACCESS_TOKEN: ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}
+          DO_CLUSTER_NAME: ${{ secrets.DO_CLUSTER_NAME }}
         run: |
-          if [ -z "${{ secrets.DO_REGISTRY_NAME }}" ]; then
-            echo "::error::Missing GitHub secret: DO_REGISTRY_NAME"
-            exit 1
-          fi
+          set -euo pipefail
 
-          if [ -z "${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}" ]; then
-            echo "::error::Missing GitHub secret: DIGITALOCEAN_ACCESS_TOKEN"
-            exit 1
-          fi
+          required_secrets=(
+            DOCKERHUB_USERNAME
+            DOCKERHUB_TOKEN
+            DIGITALOCEAN_ACCESS_TOKEN
+            DO_CLUSTER_NAME
+          )
+
+          for secret_name in "${required_secrets[@]}"; do
+            if [ -z "${!secret_name:-}" ]; then
+              echo "::error::Missing GitHub secret: ${secret_name}"
+              exit 1
+            fi
+          done
 
       - name: Verify build environment
+        shell: bash
         run: |
+          set -euo pipefail
+
           java -version
           native-image --version
           docker version
@@ -75,6 +84,8 @@ jobs:
         id: metadata
         shell: bash
         run: |
+          set -euo pipefail
+
           SHORT_SHA="${GITHUB_SHA::7}"
           IMAGE="${IMAGE_REPOSITORY}:${SHORT_SHA}"
 
@@ -83,17 +94,17 @@ jobs:
 
           echo "Building image: ${IMAGE}"
 
-      - name: Log in to DigitalOcean Container Registry
-        shell: bash
-        run: |
-          echo "${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}" |
-            docker login registry.digitalocean.com \
-              --username "${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}" \
-              --password-stdin
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v4
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Build Spring Boot native image in quick mode
         shell: bash
         run: |
+          set -euo pipefail
+
           ./mvnw \
             --batch-mode \
             --no-transfer-progress \
@@ -110,22 +121,24 @@ jobs:
       - name: Inspect generated image
         shell: bash
         run: |
+          set -euo pipefail
+
           docker image inspect \
             "${{ steps.metadata.outputs.image }}" \
             --format='Image={{index .RepoTags 0}} OS={{.Os}} Architecture={{.Architecture}} Size={{.Size}}'
 
-      - name: Push immutable commit image
-        run: |
-          docker push "${{ steps.metadata.outputs.image }}"
-
-      - name: Push latest image
+      - name: Push commit and latest images
         shell: bash
         run: |
-          docker tag \
-            "${{ steps.metadata.outputs.image }}" \
-            "${IMAGE_REPOSITORY}:latest"
+          set -euo pipefail
 
-          docker push "${IMAGE_REPOSITORY}:latest"
+          COMMIT_IMAGE="${{ steps.metadata.outputs.image }}"
+          LATEST_IMAGE="${IMAGE_REPOSITORY}:latest"
+
+          docker tag "${COMMIT_IMAGE}" "${LATEST_IMAGE}"
+
+          docker push "${COMMIT_IMAGE}"
+          docker push "${LATEST_IMAGE}"
 
       - name: Write build summary
         shell: bash
@@ -142,6 +155,7 @@ jobs:
             echo "| Builder | \`paketobuildpacks/builder-jammy-java-tiny\` |"
             echo "| Native build | \`BP_NATIVE_IMAGE=true\` |"
           } >> "$GITHUB_STEP_SUMMARY"
+
       - name: Install doctl
         uses: digitalocean/action-doctl@v2
         with:
@@ -150,18 +164,35 @@ jobs:
       - name: Save Kubernetes credentials
         shell: bash
         run: |
+          set -euo pipefail
+
           doctl kubernetes cluster kubeconfig save \
             "${{ secrets.DO_CLUSTER_NAME }}"
 
-      - name: Restart deployment to pull latest image
+      - name: Deploy immutable image
         shell: bash
         run: |
-          kubectl -n interview rollout restart deployment/rag-server
+          set -euo pipefail
+
+          CONTAINER_NAME="$(
+            kubectl -n interview get deployment rag-server \
+              -o jsonpath='{.spec.template.spec.containers[0].name}'
+          )"
+
+          echo "Deployment container: ${CONTAINER_NAME}"
+          echo "Deploying image: ${{ steps.metadata.outputs.image }}"
+
+          kubectl -n interview set image \
+            deployment/rag-server \
+            "${CONTAINER_NAME}=${{ steps.metadata.outputs.image }}"
 
       - name: Wait for rollout
         shell: bash
         run: |
-          kubectl -n interview rollout status deployment/rag-server \
+          set -euo pipefail
+
+          kubectl -n interview rollout status \
+            deployment/rag-server \
             --timeout=300s
 
       - name: Show deployed image
@@ -176,6 +207,7 @@ jobs:
           kubectl -n interview get pods \
             -l app=rag-server \
             -o wide
+
       - name: Send deployment result
         if: always()
         uses: dawidd6/action-send-mail@v6
@@ -194,6 +226,8 @@ jobs:
             项目：${{ github.repository }}
             分支：${{ github.ref_name }}
             Commit：${{ github.sha }}
+            镜像：${{ steps.metadata.outputs.image }}
             操作者：${{ github.actor }}
+
             查看日志：
             https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
