@@ -326,6 +326,13 @@
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
+                <configuration>
+                    <image>
+                        <env>
+                            <BP_NATIVE_IMAGE_BUILD_ARGUMENTS>--initialize-at-run-time=io.grpc.netty.shaded.io.netty</BP_NATIVE_IMAGE_BUILD_ARGUMENTS>
+                        </env>
+                    </image>
+                </configuration>
             </plugin>
 
             <!-- graalvm native -->
