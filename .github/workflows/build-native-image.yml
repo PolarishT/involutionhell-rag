@@ -91,7 +91,7 @@ jobs:
               --username "${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}" \
               --password-stdin
 
-      - name: Build Spring Boot native image
+      - name: Build Spring Boot native image in quick mode
         shell: bash
         run: |
           ./mvnw \
@@ -100,7 +100,12 @@ jobs:
             -Pnative \
             -DskipTests \
             spring-boot:build-image \
-            -Dspring-boot.build-image.imageName="${{ steps.metadata.outputs.image }}"
+            -Dspring-boot.build-image.imageName="${{ steps.metadata.outputs.image }}" \
+            -Dspring-boot.build-image.environment.BP_NATIVE_IMAGE=true \
+            -Dspring-boot.build-image.environment.BP_JVM_VERSION=25 \
+            -Dspring-boot.build-image.environment.BP_SPRING_AOT_ENABLED=true \
+            -Dspring-boot.build-image.environment.BP_NATIVE_IMAGE_BUILD_ARGUMENTS=-Ob \
+            -Dspring-boot.build-image.builder=paketobuildpacks/builder-jammy-java-tiny
 
       - name: Inspect generated image
         shell: bash
@@ -134,4 +139,6 @@ jobs:
             echo "| Immutable image | \`${{ steps.metadata.outputs.image }}\` |"
             echo "| Latest image | \`${IMAGE_REPOSITORY}:latest\` |"
             echo "| Runner architecture | \`linux/amd64\` |"
+            echo "| Builder | \`paketobuildpacks/builder-jammy-java-tiny\` |"
+            echo "| Native build | \`BP_NATIVE_IMAGE=true\` |"
           } >> "$GITHUB_STEP_SUMMARY"
