@@ -31,17 +31,19 @@ jobs:
       IMAGE_REPOSITORY: ${{ secrets.DOCKERHUB_USERNAME }}/unsw-opensource
 
     steps:
+      # ─────────────────────────────────────────────────────────────
+      # Checkout
+      # ─────────────────────────────────────────────────────────────
+
       - name: Checkout repository
         uses: actions/checkout@v6
 
-      - name: Set up GraalVM for Java 25
-        uses: graalvm/setup-graalvm@v1
-        with:
-          java-version: "25"
-          distribution: graalvm-community
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          cache: maven
-          components: native-image
+      - name: Make Maven Wrapper executable
+        run: chmod +x ./mvnw
+
+      # ─────────────────────────────────────────────────────────────
+      # Validate configuration
+      # ─────────────────────────────────────────────────────────────
 
       - name: Validate required secrets
         shell: bash
@@ -67,18 +69,58 @@ jobs:
             fi
           done
 
+      - name: Verify Native Image metadata
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          METADATA_DIR="src/main/resources/META-INF/native-image"
+
+          if [ ! -d "${METADATA_DIR}" ]; then
+            echo "::error::Native Image metadata directory does not exist: ${METADATA_DIR}"
+            exit 1
+          fi
+
+          echo "Native Image metadata files:"
+          find "${METADATA_DIR}" \
+            -type f \
+            -maxdepth 5 \
+            -print
+
+          if ! find "${METADATA_DIR}" \
+            -type f \
+            \( \
+              -name "reachability-metadata.json" \
+              -o -name "reflect-config.json" \
+              -o -name "proxy-config.json" \
+              -o -name "resource-config.json" \
+              -o -name "jni-config.json" \
+              -o -name "serialization-config.json" \
+            \) \
+            | grep -q .; then
+            echo "::error::No Native Image metadata JSON files were found."
+            exit 1
+          fi
+
+          echo "MyBatis-related metadata entries:"
+          grep -R -n \
+            "MapperFactoryBean\|ClassPathMapperScanner\|Slf4jImpl\|RagDocumentMapper\|RagUserMapper" \
+            "${METADATA_DIR}" \
+            || true
+
       - name: Verify build environment
         shell: bash
         run: |
           set -euo pipefail
 
-          java -version
-          native-image --version
           docker version
           uname -a
+          free -h
+          df -h
 
-      - name: Make Maven Wrapper executable
-        run: chmod +x ./mvnw
+      # ─────────────────────────────────────────────────────────────
+      # Image metadata
+      # ─────────────────────────────────────────────────────────────
 
       - name: Generate image metadata
         id: metadata
@@ -88,11 +130,18 @@ jobs:
 
           SHORT_SHA="${GITHUB_SHA::7}"
           IMAGE="${IMAGE_REPOSITORY}:${SHORT_SHA}"
+          LATEST_IMAGE="${IMAGE_REPOSITORY}:latest"
 
           echo "short_sha=${SHORT_SHA}" >> "$GITHUB_OUTPUT"
           echo "image=${IMAGE}" >> "$GITHUB_OUTPUT"
+          echo "latest_image=${LATEST_IMAGE}" >> "$GITHUB_OUTPUT"
 
-          echo "Building image: ${IMAGE}"
+          echo "Commit image: ${IMAGE}"
+          echo "Latest image: ${LATEST_IMAGE}"
+
+      # ─────────────────────────────────────────────────────────────
+      # Docker Hub login
+      # ─────────────────────────────────────────────────────────────
 
       - name: Log in to Docker Hub
         uses: docker/login-action@v4
@@ -100,8 +149,17 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Build Spring Boot native image in quick mode
+      # ─────────────────────────────────────────────────────────────
+      # Native Image build
+      # ─────────────────────────────────────────────────────────────
+
+      - name: Build Spring Boot Native Image
         shell: bash
+        env:
+          MAVEN_OPTS: >-
+            -Dfile.encoding=UTF-8
+            -XX:+UseSerialGC
+            -Xmx2g
         run: |
           set -euo pipefail
 
@@ -110,6 +168,7 @@ jobs:
             --no-transfer-progress \
             -Pnative \
             -DskipTests \
+            clean \
             spring-boot:build-image \
             -Dspring-boot.build-image.imageName="${{ steps.metadata.outputs.image }}" \
             -Dspring-boot.build-image.environment.BP_NATIVE_IMAGE=true \
@@ -127,18 +186,31 @@ jobs:
             "${{ steps.metadata.outputs.image }}" \
             --format='Image={{index .RepoTags 0}} OS={{.Os}} Architecture={{.Architecture}} Size={{.Size}}'
 
+          echo "Image layers:"
+          docker history \
+            "${{ steps.metadata.outputs.image }}" \
+            --no-trunc \
+            | head -30
+
+      # ─────────────────────────────────────────────────────────────
+      # Push images
+      # ─────────────────────────────────────────────────────────────
+
       - name: Push commit and latest images
         shell: bash
         run: |
           set -euo pipefail
 
           COMMIT_IMAGE="${{ steps.metadata.outputs.image }}"
-          LATEST_IMAGE="${IMAGE_REPOSITORY}:latest"
+          LATEST_IMAGE="${{ steps.metadata.outputs.latest_image }}"
 
           docker tag "${COMMIT_IMAGE}" "${LATEST_IMAGE}"
 
           docker push "${COMMIT_IMAGE}"
           docker push "${LATEST_IMAGE}"
+
+          echo "Pushed immutable image: ${COMMIT_IMAGE}"
+          echo "Pushed latest image: ${LATEST_IMAGE}"
 
       - name: Write build summary
         shell: bash
@@ -150,11 +222,18 @@ jobs:
             echo "|---|---|"
             echo "| Commit | \`${GITHUB_SHA}\` |"
             echo "| Immutable image | \`${{ steps.metadata.outputs.image }}\` |"
-            echo "| Latest image | \`${IMAGE_REPOSITORY}:latest\` |"
+            echo "| Latest image | \`${{ steps.metadata.outputs.latest_image }}\` |"
             echo "| Runner architecture | \`linux/amd64\` |"
             echo "| Builder | \`paketobuildpacks/builder-jammy-java-tiny\` |"
+            echo "| Java version | \`25\` |"
             echo "| Native build | \`BP_NATIVE_IMAGE=true\` |"
+            echo "| Native optimization | \`-Ob\` |"
+            echo "| Metadata directory | \`src/main/resources/META-INF/native-image\` |"
           } >> "$GITHUB_STEP_SUMMARY"
+
+      # ─────────────────────────────────────────────────────────────
+      # DigitalOcean deployment
+      # ─────────────────────────────────────────────────────────────
 
       - name: Install doctl
         uses: digitalocean/action-doctl@v2
@@ -169,44 +248,132 @@ jobs:
           doctl kubernetes cluster kubeconfig save \
             "${{ secrets.DO_CLUSTER_NAME }}"
 
+      - name: Verify Kubernetes connection
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          kubectl cluster-info
+          kubectl get nodes
+          kubectl -n interview get deployment rag-server
+
       - name: Deploy immutable image
         shell: bash
         run: |
           set -euo pipefail
 
+          DEPLOYMENT_NAME="rag-server"
+          NAMESPACE="interview"
+          IMAGE="${{ steps.metadata.outputs.image }}"
+
           CONTAINER_NAME="$(
-            kubectl -n interview get deployment rag-server \
+            kubectl \
+              -n "${NAMESPACE}" \
+              get deployment "${DEPLOYMENT_NAME}" \
               -o jsonpath='{.spec.template.spec.containers[0].name}'
           )"
 
-          echo "Deployment container: ${CONTAINER_NAME}"
-          echo "Deploying image: ${{ steps.metadata.outputs.image }}"
+          if [ -z "${CONTAINER_NAME}" ]; then
+            echo "::error::Could not determine deployment container name."
+            exit 1
+          fi
 
-          kubectl -n interview set image \
-            deployment/rag-server \
-            "${CONTAINER_NAME}=${{ steps.metadata.outputs.image }}"
+          echo "Namespace: ${NAMESPACE}"
+          echo "Deployment: ${DEPLOYMENT_NAME}"
+          echo "Container: ${CONTAINER_NAME}"
+          echo "Deploying image: ${IMAGE}"
+
+          kubectl \
+            -n "${NAMESPACE}" \
+            set image \
+            "deployment/${DEPLOYMENT_NAME}" \
+            "${CONTAINER_NAME}=${IMAGE}"
 
       - name: Wait for rollout
         shell: bash
         run: |
           set -euo pipefail
 
-          kubectl -n interview rollout status \
+          kubectl \
+            -n interview \
+            rollout status \
             deployment/rag-server \
             --timeout=300s
 
       - name: Show deployed image
         shell: bash
         run: |
-          kubectl -n interview get deployment rag-server \
-            -o jsonpath='{.spec.template.spec.containers[0].image}{"\n"}'
+          set -euo pipefail
+
+          DEPLOYED_IMAGE="$(
+            kubectl \
+              -n interview \
+              get deployment rag-server \
+              -o jsonpath='{.spec.template.spec.containers[0].image}'
+          )"
+
+          EXPECTED_IMAGE="${{ steps.metadata.outputs.image }}"
+
+          echo "Expected image: ${EXPECTED_IMAGE}"
+          echo "Deployed image: ${DEPLOYED_IMAGE}"
+
+          if [ "${DEPLOYED_IMAGE}" != "${EXPECTED_IMAGE}" ]; then
+            echo "::error::The deployed image does not match the expected image."
+            exit 1
+          fi
 
       - name: Show pods
         shell: bash
         run: |
-          kubectl -n interview get pods \
+          kubectl \
+            -n interview \
+            get pods \
             -l app=rag-server \
             -o wide
+
+      - name: Show recent pod logs on failure
+        if: failure()
+        shell: bash
+        run: |
+          echo "Deployment:"
+          kubectl \
+            -n interview \
+            describe deployment rag-server \
+            || true
+
+          echo "Pods:"
+          kubectl \
+            -n interview \
+            get pods \
+            -l app=rag-server \
+            -o wide \
+            || true
+
+          POD_NAME="$(
+            kubectl \
+              -n interview \
+              get pods \
+              -l app=rag-server \
+              --sort-by=.metadata.creationTimestamp \
+              -o jsonpath='{.items[-1:].metadata.name}' \
+              2>/dev/null \
+              || true
+          )"
+
+          if [ -n "${POD_NAME}" ]; then
+            echo "Recent logs for pod: ${POD_NAME}"
+
+            kubectl \
+              -n interview \
+              logs "${POD_NAME}" \
+              --all-containers=true \
+              --tail=200 \
+              || true
+          fi
+
+      # ─────────────────────────────────────────────────────────────
+      # Email notification
+      # ─────────────────────────────────────────────────────────────
 
       - name: Send deployment result
         if: always()
@@ -226,7 +393,7 @@ jobs:
             项目：${{ github.repository }}
             分支：${{ github.ref_name }}
             Commit：${{ github.sha }}
-            镜像：${{ steps.metadata.outputs.image }}
+            镜像：${{ steps.metadata.outputs.image || '镜像尚未生成' }}
             操作者：${{ github.actor }}
 
             查看日志：
