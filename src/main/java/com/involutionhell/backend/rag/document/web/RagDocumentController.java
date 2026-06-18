@@ -5,27 +5,27 @@ import com.involutionhell.backend.rag.document.api.*;
 import com.involutionhell.backend.rag.shared.markdown.MarkdownDocumentParser;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
+import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.http.MediaType;
-import org.springframework.util.StreamUtils;
+import org.springframework.http.codec.multipart.FilePart;
 import org.springframework.util.StringUtils;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
+import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Schedulers;
 
-import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
-import java.sql.Time;
-import java.time.LocalTime;
 import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.LinkedHashMap;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import static org.apache.logging.log4j.util.Strings.trimToNull;
 
 @RestController
 @Validated
@@ -33,7 +33,7 @@ import static org.apache.logging.log4j.util.Strings.trimToNull;
 public class RagDocumentController {
 
     private static final Logger log = LoggerFactory.getLogger(RagDocumentController.class);
-    private static final long MAX_FILE_SIZE = 10 * 1024 * 1024;
+    private static final int MAX_FILE_SIZE = 10 * 1024 * 1024;
     private static final Pattern FIRST_HEADING_PATTERN = Pattern.compile("(?m)^#\\s+(.+?)\\s*$");
     private final DocumentCommandFacade documentCommandFacade;
     private final DocumentQueryFacade documentQueryFacade;
@@ -49,80 +49,115 @@ public class RagDocumentController {
         this.markdownDocumentParser = markdownDocumentParser;
     }
 
-    @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE, value = "/create")
-    public ApiResponse<RagDocumentView> createDocument(@Valid @RequestBody RagDocumentCreateRequest request) {
-        return ApiResponse.ok("文档已接收，开始索引", documentCommandFacade.createDocument(request));
+    @PostMapping(value = "/create", consumes = MediaType.APPLICATION_JSON_VALUE)
+    public Mono<ApiResponse<RagDocumentView>> createDocument(
+            @Valid @RequestBody RagDocumentCreateRequest request
+    ) {
+        return Mono.fromCallable(() ->
+                ApiResponse.ok(
+                        "文档已接收，开始索引",
+                        documentCommandFacade.createDocument(request)
+                )
+        );
     }
 
     @PostMapping(value = "/create", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ApiResponse<RagDocumentView> createDocument(
-            @Valid
-            @RequestPart("file") MultipartFile file
+    public Mono<ApiResponse<RagDocumentView>> createDocument(
+            @RequestPart("file") FilePart file
     ) {
-        // 1. Web 层的文件基础校验（防空文件、防超大文件 OOM）
-        if (file == null || file.isEmpty()) {
-            throw new IllegalArgumentException("上传文件不能为空");
-        }
-        if (file.getSize() > MAX_FILE_SIZE) {
-            throw new IllegalArgumentException("上传文件过大，限制为 10MB");
-        }
-
-        // 2. 解析文件名与推导默认属性
         String originalFilename = resolveOriginalFilename(file);
+        MediaType contentType = file.headers().getContentType();
 
-        // 🛡️ 防火墙 2：严格校验 Markdown 文件类型，防恶意文件上传
-        String markdownRejectReason = classifyMarkdownRejection(originalFilename, file.getContentType());
-        if (markdownRejectReason != null) {
-            log.warn("非法文件上传尝试: filename={}, contentType={}, rejectReason={}",
-                    originalFilename, file.getContentType(), markdownRejectReason);
-            throw new IllegalArgumentException("安全拦截：只允许上传 Markdown 文件 (.md 或 .markdown)");
+        String rejectionReason =
+                classifyMarkdownRejection(originalFilename, contentType);
+
+        if (rejectionReason != null) {
+            log.warn(
+                    "非法文件上传尝试: filename={}, contentType={}, rejectReason={}",
+                    originalFilename,
+                    contentType,
+                    rejectionReason
+            );
+
+            return Mono.error(new IllegalArgumentException(
+                    "安全拦截：只允许上传 Markdown 文件（.md、.markdown 或 .mdx）"
+            ));
         }
 
-        // 3. 读取文件内容为字符串
-        String content;
-        try (InputStream inputStream = file.getInputStream()) {
-            // 直接从流中复制为 String，避免中间产生巨大的 byte[] 垃圾
-            content = StreamUtils.copyToString(inputStream, StandardCharsets.UTF_8);
+        return DataBufferUtils.join(file.content(), MAX_FILE_SIZE)
+                .map(dataBuffer -> {
+                    try {
+                        int contentLength = dataBuffer.readableByteCount();
+                        byte[] bytes = new byte[contentLength];
+                        dataBuffer.read(bytes);
 
-            // 防二进制空字符注入 (Null-Byte Injection)
-            if (content.indexOf('\0') >= 0) {
-                throw new IllegalArgumentException("安全拦截：文件内容包含非法二进制空字符");
-            }
-        } catch (IllegalArgumentException e) {
-            throw e; // 直接向上抛出安全拦截异常
-        } catch (Exception exception) {
-            log.error("读取上传文件失败: filename={}", originalFilename, exception);
-            throw new IllegalStateException("读取上传文件失败，请检查文件编码", exception);
-        }
+                        return new UploadedMarkdown(
+                                new String(bytes, StandardCharsets.UTF_8),
+                                contentLength
+                        );
+                    } finally {
+                        DataBufferUtils.release(dataBuffer);
+                    }
+                })
+                .switchIfEmpty(Mono.error(
+                        new IllegalArgumentException("上传文件内容为空")
+                )).flatMap(uploadedMarkdown -> {
+                    String content = uploadedMarkdown.content();
 
-        // 4. 从 Markdown 内容和上传对象推导文档属性，避免调用方手工维护元数据。
-        InferredUploadMetadata inferred = inferUploadMetadata(content, originalFilename);
+                    if (!StringUtils.hasText(content)) {
+                        return Mono.error(
+                                new IllegalArgumentException("上传文件内容不能为空")
+                        );
+                    }
 
-        // 5. 组装 Web 层附加的元数据
-        Map<String, Object> uploadMetadata = new LinkedHashMap<>();
-        if (StringUtils.hasText(originalFilename)) uploadMetadata.put("originalFilename", originalFilename);
-        if (StringUtils.hasText(file.getContentType())) uploadMetadata.put("contentType", file.getContentType());
-        uploadMetadata.put("uploadMode", "multipart");
-        uploadMetadata.put("fileSize", file.getSize());
-        uploadMetadata.put("metadataInferred", true);
-        ZoneId aetZone = ZoneId.of("Australia/Sydney");
-        uploadMetadata.put("uploadTime", Time.valueOf(LocalTime.now(aetZone)));
-        logUpload(file, originalFilename, inferred);
+                    if (content.indexOf('\0') >= 0) {
+                        return Mono.error(new IllegalArgumentException(
+                                "安全拦截：文件内容包含非法二进制空字符"
+                        ));
+                    }
 
-        // 6. 构建纯粹的领域请求对象，丢给 Service 层
-        RagDocumentCreateRequest request = new RagDocumentCreateRequest(
-                inferred.sourceType(),
-                inferred.sourceUri(),
-                inferred.externalRef(),
-                inferred.title(),
-                content,
-                uploadMetadata
-        );
+                    InferredUploadMetadata inferred =
+                            inferUploadMetadata(content, originalFilename);
 
-        return ApiResponse.ok(
-                "文档已接收，开始索引",
-                documentCommandFacade.createDocument(request)
-        );
+                    Map<String, Object> uploadMetadata = new LinkedHashMap<>();
+                    uploadMetadata.put("originalFilename", originalFilename);
+
+                    if (contentType != null) {
+                        uploadMetadata.put("contentType", contentType.toString());
+                    }
+
+                    uploadMetadata.put("uploadMode", "multipart");
+                    uploadMetadata.put("metadataInferred", true);
+                    uploadMetadata.put(
+                            "uploadTime",
+                            ZonedDateTime.now(ZoneId.of("Australia/Sydney"))
+                    );
+
+                    logUpload(
+                            originalFilename,
+                            uploadedMarkdown.contentLength(),
+                            inferred
+                    );
+
+                    RagDocumentCreateRequest request =
+                            new RagDocumentCreateRequest(
+                                    inferred.sourceType(),
+                                    inferred.sourceUri(),
+                                    inferred.externalRef(),
+                                    inferred.title(),
+                                    content,
+                                    uploadMetadata
+                            );
+
+                    return Mono.fromCallable(() ->
+                                    documentCommandFacade.createDocument(request)
+                            )
+                            .subscribeOn(Schedulers.boundedElastic());
+                })
+                .map(view -> ApiResponse.ok(
+                        "文档已接收，开始索引",
+                        view
+                ));
     }
 
 
@@ -150,35 +185,68 @@ public class RagDocumentController {
         return ApiResponse.okMessage("文档已进入删除流程");
     }
 
-    private String resolveOriginalFilename(MultipartFile file) {
-        String originalFilename = trimToNull(StringUtils.cleanPath(Objects.requireNonNull(file.getOriginalFilename())));
-        if (!StringUtils.hasText(originalFilename)) {
+    private String resolveOriginalFilename(FilePart file) {
+        Objects.requireNonNull(file, "file 不能为 null");
+
+        String cleanedFilename = StringUtils.cleanPath(file.filename());
+
+        if (!StringUtils.hasText(cleanedFilename)) {
             return "uploaded-document.md";
         }
 
-        int lastSlash = Math.max(originalFilename.lastIndexOf('/'), originalFilename.lastIndexOf('\\'));
-        return lastSlash >= 0 ? originalFilename.substring(lastSlash + 1) : originalFilename;
+        cleanedFilename = cleanedFilename.trim();
+
+        int lastSlash = Math.max(
+                cleanedFilename.lastIndexOf('/'),
+                cleanedFilename.lastIndexOf('\\')
+        );
+
+        String filename = lastSlash >= 0
+                ? cleanedFilename.substring(lastSlash + 1)
+                : cleanedFilename;
+
+        if (!StringUtils.hasText(filename)) {
+            return "uploaded-document.md";
+        }
+
+        return filename;
     }
 
     /**
      * 严格验证是否为 Markdown 文件，返回拒绝原因（null 表示通过）。
      * 用作日志可观测字段，便于 on-call 区分误传 vs 恶意上传。
      */
-    private String classifyMarkdownRejection(String filename, String contentType) {
+    private String classifyMarkdownRejection(
+            String filename,
+            @Nullable MediaType contentType
+    ) {
         if (!StringUtils.hasText(filename)) {
             return "MISSING_FILENAME";
         }
-        String lowerFilename = filename.toLowerCase();
-        boolean hasValidExtension = lowerFilename.endsWith(".md") || lowerFilename.endsWith(".markdown") || lowerFilename.endsWith(".mdx");
-        if (!hasValidExtension) {
+
+        String lowerFilename = filename.toLowerCase(Locale.ROOT);
+
+        boolean validExtension =
+                lowerFilename.endsWith(".md")
+                        || lowerFilename.endsWith(".markdown")
+                        || lowerFilename.endsWith(".mdx");
+
+        if (!validExtension) {
             return "INVALID_EXTENSION";
         }
-        if (StringUtils.hasText(contentType)) {
-            String lowerContentType = contentType.toLowerCase();
-            if (lowerContentType.contains("html") || lowerContentType.contains("javascript") || lowerContentType.contains("shell")) {
+
+        if (contentType != null) {
+            String lowerContentType =
+                    contentType.toString().toLowerCase(Locale.ROOT);
+
+            if (lowerContentType.contains("html")
+                    || lowerContentType.contains("javascript")
+                    || lowerContentType.contains("shell")
+                    || lowerContentType.contains("executable")) {
                 return "DANGEROUS_CONTENT_TYPE";
             }
         }
+
         return null;
     }
 
@@ -236,15 +304,21 @@ public class RagDocumentController {
         return title.replace('-', ' ').replace('_', ' ').trim();
     }
 
-    private void logUpload(MultipartFile file, String originalFilename, InferredUploadMetadata inferred) {
+    private void logUpload(String originalFilename, int contentLength, InferredUploadMetadata inferred) {
         log.info(
                 "RAG upload received: filename={}, sourceType={}, sourceUri={}, title={}, size={}",
                 originalFilename,
                 inferred.sourceType(),
                 inferred.sourceUri(),
                 inferred.title(),
-                file.getSize()
+                contentLength
         );
+    }
+
+    private record UploadedMarkdown(
+            String content,
+            int contentLength
+    ) {
     }
 
     private record InferredUploadMetadata(

@@ -422,12 +422,6 @@
         {
           "name": "<init>",
           "parameterTypes": []
-        },
-        {
-          "name": "handleUnexpected",
-          "parameterTypes": [
-            "java.lang.Exception"
-          ]
         }
       ]
     },
@@ -462,7 +456,61 @@
       "type": "com.involutionhell.backend.rag.document.api.RagDocumentUpdateRequest"
     },
     {
-      "type": "com.involutionhell.backend.rag.document.api.RagDocumentView"
+      "type": "com.involutionhell.backend.rag.document.api.RagDocumentView",
+      "methods": [
+        {
+          "name": "attemptCount",
+          "parameterTypes": []
+        },
+        {
+          "name": "chunkCount",
+          "parameterTypes": []
+        },
+        {
+          "name": "createdAt",
+          "parameterTypes": []
+        },
+        {
+          "name": "externalRef",
+          "parameterTypes": []
+        },
+        {
+          "name": "id",
+          "parameterTypes": []
+        },
+        {
+          "name": "indexedAt",
+          "parameterTypes": []
+        },
+        {
+          "name": "lastAttemptedAt",
+          "parameterTypes": []
+        },
+        {
+          "name": "lastError",
+          "parameterTypes": []
+        },
+        {
+          "name": "sourceType",
+          "parameterTypes": []
+        },
+        {
+          "name": "sourceUri",
+          "parameterTypes": []
+        },
+        {
+          "name": "status",
+          "parameterTypes": []
+        },
+        {
+          "name": "title",
+          "parameterTypes": []
+        },
+        {
+          "name": "updatedAt",
+          "parameterTypes": []
+        }
+      ]
     },
     {
       "type": "com.involutionhell.backend.rag.document.api.package-info"
@@ -477,6 +525,12 @@
             "com.involutionhell.backend.rag.document.api.DocumentQueryFacade",
             "org.springframework.context.ApplicationEventPublisher",
             "com.involutionhell.backend.rag.shared.markdown.MarkdownDocumentParser"
+          ]
+        },
+        {
+          "name": "createDocument",
+          "parameterTypes": [
+            "com.involutionhell.backend.rag.document.api.RagDocumentCreateRequest"
           ]
         }
       ]
@@ -599,6 +653,39 @@
             "java.time.OffsetDateTime",
             "int"
           ]
+        },
+        {
+          "name": "markIndexed",
+          "parameterTypes": [
+            "java.lang.Long",
+            "java.lang.Long",
+            "int",
+            "java.time.OffsetDateTime"
+          ]
+        },
+        {
+          "name": "markPending",
+          "parameterTypes": [
+            "java.lang.Long"
+          ]
+        },
+        {
+          "name": "markProcessing",
+          "parameterTypes": [
+            "java.lang.Long"
+          ]
+        },
+        {
+          "name": "save",
+          "parameterTypes": [
+            "java.lang.String",
+            "java.lang.String",
+            "java.lang.String",
+            "java.lang.String",
+            "java.lang.String",
+            "java.lang.String",
+            "java.util.Map"
+          ]
         }
       ]
     },
@@ -713,6 +800,44 @@
       ]
     },
     {
+      "type": "com.involutionhell.backend.rag.document.persistence.mybatis.RagDocumentEntity_$$_jvst5_1",
+      "fields": [
+        {
+          "name": "_filter_signature"
+        }
+      ],
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        },
+        {
+          "name": "_d21getUpdates",
+          "parameterTypes": []
+        },
+        {
+          "name": "_d2finalize",
+          "parameterTypes": []
+        },
+        {
+          "name": "_d40set",
+          "parameterTypes": [
+            "java.lang.String",
+            "java.lang.Object",
+            "boolean"
+          ]
+        },
+        {
+          "name": "_d67setRaw",
+          "parameterTypes": [
+            "java.lang.String",
+            "java.lang.Object",
+            "boolean"
+          ]
+        }
+      ]
+    },
+    {
       "type": "com.involutionhell.backend.rag.document.persistence.mybatis.RagDocumentMapper"
     },
     {
@@ -737,6 +862,12 @@
             "com.involutionhell.backend.rag.document.api.DocumentQueryFacade",
             "com.involutionhell.backend.rag.shared.markdown.MarkdownDocumentParser"
           ]
+        },
+        {
+          "name": "createDocument",
+          "parameterTypes": [
+            "org.springframework.http.codec.multipart.FilePart"
+          ]
         }
       ]
     },
@@ -753,6 +884,9 @@
     },
     {
       "type": "com.involutionhell.backend.rag.document.web.RagDocumentController$InferredUploadMetadata"
+    },
+    {
+      "type": "com.involutionhell.backend.rag.document.web.RagDocumentController$UploadedMarkdown"
     },
     {
       "type": "com.involutionhell.backend.rag.indexing.api.IndexingChunkQueryFacade"
@@ -1051,6 +1185,14 @@
             "org.springframework.beans.factory.ObjectProvider",
             "com.involutionhell.backend.rag.indexing.service.RagIndexingMetrics"
           ]
+        },
+        {
+          "name": "requestIndexing",
+          "parameterTypes": [
+            "java.lang.Long",
+            "java.lang.String",
+            "java.lang.String"
+          ]
         }
       ]
     },
@@ -1072,6 +1214,12 @@
           "name": "<init>",
           "parameterTypes": [
             "com.involutionhell.backend.rag.indexing.api.IndexingCommandFacade"
+          ]
+        },
+        {
+          "name": "onDocumentIndexRequested",
+          "parameterTypes": [
+            "com.involutionhell.backend.rag.document.api.DocumentIndexRequestedEvent"
           ]
         }
       ]
@@ -1182,6 +1330,14 @@
           "parameterTypes": [
             "com.involutionhell.backend.rag.indexing.persistence.RagIndexOutboxRepository"
           ]
+        },
+        {
+          "name": "confirmConsumedOrThrow",
+          "parameterTypes": [
+            "java.lang.Long",
+            "java.lang.String",
+            "java.lang.String"
+          ]
         }
       ]
     },
@@ -1258,7 +1414,29 @@
       "type": "com.involutionhell.backend.rag.indexing.messaging.RagIndexEventPublisher"
     },
     {
-      "type": "com.involutionhell.backend.rag.indexing.messaging.RagIndexMessage"
+      "type": "com.involutionhell.backend.rag.indexing.messaging.RagIndexMessage",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": [
+            "java.lang.Long",
+            "java.lang.String",
+            "java.time.OffsetDateTime"
+          ]
+        },
+        {
+          "name": "contentSha256",
+          "parameterTypes": []
+        },
+        {
+          "name": "documentId",
+          "parameterTypes": []
+        },
+        {
+          "name": "requestedAt",
+          "parameterTypes": []
+        }
+      ]
     },
     {
       "type": "com.involutionhell.backend.rag.indexing.messaging.RagIndexMessageListener",
@@ -1401,6 +1579,26 @@
           ]
         },
         {
+          "name": "deleteByDocumentId",
+          "parameterTypes": [
+            "java.lang.Long"
+          ]
+        },
+        {
+          "name": "deleteByDocumentIdAndGeneration",
+          "parameterTypes": [
+            "java.lang.Long",
+            "java.lang.Long"
+          ]
+        },
+        {
+          "name": "deleteByDocumentIdExceptGeneration",
+          "parameterTypes": [
+            "java.lang.Long",
+            "java.lang.Long"
+          ]
+        },
+        {
           "name": "findKeywordCandidates",
           "parameterTypes": [
             "java.util.Set",
@@ -1408,8 +1606,35 @@
           ]
         },
         {
+          "name": "findMaxChunkIndexByDocumentIdExceptGeneration",
+          "parameterTypes": [
+            "java.lang.Long",
+            "java.lang.Long"
+          ]
+        },
+        {
           "name": "findSearchableByVectorIds",
           "parameterTypes": [
+            "java.util.List"
+          ]
+        },
+        {
+          "name": "findVectorIdsByDocumentId",
+          "parameterTypes": [
+            "java.lang.Long"
+          ]
+        },
+        {
+          "name": "findVectorIdsByDocumentIdAndGeneration",
+          "parameterTypes": [
+            "java.lang.Long",
+            "java.lang.Long"
+          ]
+        },
+        {
+          "name": "saveAll",
+          "parameterTypes": [
+            "java.lang.Long",
             "java.util.List"
           ]
         }
@@ -1434,6 +1659,20 @@
           "parameterTypes": [
             "com.involutionhell.backend.rag.indexing.persistence.mybatis.RagEmbeddingCacheMapper",
             "com.involutionhell.backend.rag.shared.persistence.RagNestedTransactionExecutor"
+          ]
+        },
+        {
+          "name": "findEmbeddingJsonByChunkHashes",
+          "parameterTypes": [
+            "java.util.List",
+            "java.lang.String",
+            "int"
+          ]
+        },
+        {
+          "name": "saveAll",
+          "parameterTypes": [
+            "java.util.List"
           ]
         }
       ]
@@ -1460,6 +1699,22 @@
           ]
         },
         {
+          "name": "annotateEvent",
+          "parameterTypes": [
+            "java.lang.Long",
+            "java.lang.String",
+            "java.lang.String"
+          ]
+        },
+        {
+          "name": "attachMessageId",
+          "parameterTypes": [
+            "java.lang.Long",
+            "java.lang.String",
+            "java.lang.String"
+          ]
+        },
+        {
           "name": "findByDocumentIdAndContentSha256",
           "parameterTypes": [
             "java.lang.Long",
@@ -1471,6 +1726,40 @@
           "parameterTypes": [
             "java.time.OffsetDateTime",
             "int"
+          ]
+        },
+        {
+          "name": "markSucceeded",
+          "parameterTypes": [
+            "java.lang.Long",
+            "java.lang.String",
+            "com.involutionhell.backend.rag.indexing.model.RagIndexStage",
+            "java.lang.Long"
+          ]
+        },
+        {
+          "name": "queue",
+          "parameterTypes": [
+            "java.lang.Long",
+            "java.lang.String"
+          ]
+        },
+        {
+          "name": "startAttempt",
+          "parameterTypes": [
+            "java.lang.Long",
+            "java.lang.String",
+            "com.involutionhell.backend.rag.indexing.model.RagIndexStage",
+            "java.lang.Long"
+          ]
+        },
+        {
+          "name": "updateStage",
+          "parameterTypes": [
+            "java.lang.Long",
+            "java.lang.String",
+            "com.involutionhell.backend.rag.indexing.model.RagIndexStage",
+            "com.involutionhell.backend.rag.indexing.model.RagIndexStage"
           ]
         }
       ]
@@ -1502,6 +1791,25 @@
           "parameterTypes": [
             "java.lang.Long",
             "java.lang.String"
+          ]
+        },
+        {
+          "name": "save",
+          "parameterTypes": [
+            "java.lang.Long",
+            "java.lang.Long",
+            "java.lang.Long",
+            "java.lang.String",
+            "java.lang.String",
+            "java.lang.String",
+            "java.lang.String",
+            "java.lang.String",
+            "java.lang.String",
+            "boolean",
+            "java.lang.String",
+            "java.lang.String",
+            "java.lang.String",
+            "java.util.Map"
           ]
         }
       ]
@@ -1552,6 +1860,22 @@
           ]
         },
         {
+          "name": "confirmConsumed",
+          "parameterTypes": [
+            "java.lang.Long",
+            "java.lang.String",
+            "java.lang.String"
+          ]
+        },
+        {
+          "name": "enqueue",
+          "parameterTypes": [
+            "java.lang.Long",
+            "java.lang.String",
+            "com.involutionhell.backend.rag.indexing.model.RagIndexOutboxEventType"
+          ]
+        },
+        {
           "name": "findByDocumentIdAndContentSha256",
           "parameterTypes": [
             "java.lang.Long",
@@ -1571,6 +1895,19 @@
             "java.time.OffsetDateTime",
             "int"
           ]
+        },
+        {
+          "name": "markSending",
+          "parameterTypes": [
+            "java.lang.Long"
+          ]
+        },
+        {
+          "name": "markSent",
+          "parameterTypes": [
+            "java.lang.Long",
+            "java.lang.String"
+          ]
         }
       ]
     },
@@ -1586,13 +1923,129 @@
       ]
     },
     {
-      "type": "com.involutionhell.backend.rag.indexing.persistence.mybatis.RagChunkEntity"
+      "type": "com.involutionhell.backend.rag.indexing.persistence.mybatis.RagChunkEntity",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        },
+        {
+          "name": "setCharCount",
+          "parameterTypes": [
+            "java.lang.Integer"
+          ]
+        },
+        {
+          "name": "setChunkHash",
+          "parameterTypes": [
+            "java.lang.String"
+          ]
+        },
+        {
+          "name": "setChunkIndex",
+          "parameterTypes": [
+            "java.lang.Integer"
+          ]
+        },
+        {
+          "name": "setChunkText",
+          "parameterTypes": [
+            "java.lang.String"
+          ]
+        },
+        {
+          "name": "setCreatedAt",
+          "parameterTypes": [
+            "java.time.OffsetDateTime"
+          ]
+        },
+        {
+          "name": "setDocumentId",
+          "parameterTypes": [
+            "java.lang.Long"
+          ]
+        },
+        {
+          "name": "setId",
+          "parameterTypes": [
+            "java.lang.Long"
+          ]
+        },
+        {
+          "name": "setIndexGeneration",
+          "parameterTypes": [
+            "java.lang.Long"
+          ]
+        },
+        {
+          "name": "setMetadata",
+          "parameterTypes": [
+            "java.lang.String"
+          ]
+        },
+        {
+          "name": "setTokenCount",
+          "parameterTypes": [
+            "java.lang.Integer"
+          ]
+        },
+        {
+          "name": "setUpdatedAt",
+          "parameterTypes": [
+            "java.time.OffsetDateTime"
+          ]
+        },
+        {
+          "name": "setVectorId",
+          "parameterTypes": [
+            "java.lang.String"
+          ]
+        }
+      ]
     },
     {
       "type": "com.involutionhell.backend.rag.indexing.persistence.mybatis.RagChunkMapper"
     },
     {
       "type": "com.involutionhell.backend.rag.indexing.persistence.mybatis.RagEmbeddingCacheEntity"
+    },
+    {
+      "type": "com.involutionhell.backend.rag.indexing.persistence.mybatis.RagEmbeddingCacheEntity_$$_jvst5_3",
+      "fields": [
+        {
+          "name": "_filter_signature"
+        }
+      ],
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        },
+        {
+          "name": "_d10getUpdates",
+          "parameterTypes": []
+        },
+        {
+          "name": "_d29set",
+          "parameterTypes": [
+            "java.lang.String",
+            "java.lang.Object",
+            "boolean"
+          ]
+        },
+        {
+          "name": "_d2finalize",
+          "parameterTypes": []
+        },
+        {
+          "name": "_d49setRaw",
+          "parameterTypes": [
+            "java.lang.String",
+            "java.lang.Object",
+            "boolean"
+          ]
+        }
+      ]
     },
     {
       "type": "com.involutionhell.backend.rag.indexing.persistence.mybatis.RagEmbeddingCacheMapper"
@@ -1686,6 +2139,44 @@
           "name": "setVersion",
           "parameterTypes": [
             "java.lang.Long"
+          ]
+        }
+      ]
+    },
+    {
+      "type": "com.involutionhell.backend.rag.indexing.persistence.mybatis.RagIndexJobEntity_$$_jvst5_0",
+      "fields": [
+        {
+          "name": "_filter_signature"
+        }
+      ],
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        },
+        {
+          "name": "_d18getUpdates",
+          "parameterTypes": []
+        },
+        {
+          "name": "_d2finalize",
+          "parameterTypes": []
+        },
+        {
+          "name": "_d38set",
+          "parameterTypes": [
+            "java.lang.String",
+            "java.lang.Object",
+            "boolean"
+          ]
+        },
+        {
+          "name": "_d62setRaw",
+          "parameterTypes": [
+            "java.lang.String",
+            "java.lang.Object",
+            "boolean"
           ]
         }
       ]
@@ -1877,6 +2368,44 @@
       ]
     },
     {
+      "type": "com.involutionhell.backend.rag.indexing.persistence.mybatis.RagIndexOutboxEntity_$$_jvst5_2",
+      "fields": [
+        {
+          "name": "_filter_signature"
+        }
+      ],
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        },
+        {
+          "name": "_d17getUpdates",
+          "parameterTypes": []
+        },
+        {
+          "name": "_d2finalize",
+          "parameterTypes": []
+        },
+        {
+          "name": "_d36set",
+          "parameterTypes": [
+            "java.lang.String",
+            "java.lang.Object",
+            "boolean"
+          ]
+        },
+        {
+          "name": "_d62setRaw",
+          "parameterTypes": [
+            "java.lang.String",
+            "java.lang.Object",
+            "boolean"
+          ]
+        }
+      ]
+    },
+    {
       "type": "com.involutionhell.backend.rag.indexing.persistence.mybatis.RagIndexOutboxMapper"
     },
     {
@@ -1993,6 +2522,15 @@
             "com.involutionhell.backend.rag.indexing.persistence.RagIndexJobRepository",
             "com.involutionhell.backend.rag.indexing.persistence.RagIndexOutboxRepository"
           ]
+        },
+        {
+          "name": "record",
+          "parameterTypes": [
+            "com.involutionhell.backend.rag.indexing.workflow.IndexWorkflowState",
+            "com.involutionhell.backend.rag.indexing.workflow.IndexWorkflowState",
+            "com.involutionhell.backend.rag.indexing.workflow.IndexWorkflowEvent",
+            "com.involutionhell.backend.rag.indexing.workflow.IndexWorkflowCommand"
+          ]
         }
       ]
     },
@@ -2031,6 +2569,15 @@
             "com.involutionhell.backend.rag.document.spi.DocumentIndexingSpi",
             "com.involutionhell.backend.rag.indexing.persistence.RagIndexJobRepository"
           ]
+        },
+        {
+          "name": "project",
+          "parameterTypes": [
+            "com.involutionhell.backend.rag.indexing.workflow.IndexWorkflowState",
+            "com.involutionhell.backend.rag.indexing.workflow.IndexWorkflowState",
+            "com.involutionhell.backend.rag.indexing.workflow.IndexWorkflowEvent",
+            "com.involutionhell.backend.rag.indexing.workflow.IndexWorkflowCommand"
+          ]
         }
       ]
     },
@@ -2057,6 +2604,62 @@
             "com.involutionhell.backend.rag.indexing.workflow.IndexWorkflowProjector",
             "com.involutionhell.backend.rag.indexing.workflow.IndexWorkflowAuditService",
             "com.involutionhell.backend.rag.indexing.workflow.IndexWorkflowStateMachineFactory"
+          ]
+        },
+        {
+          "name": "attachMessageId",
+          "parameterTypes": [
+            "java.lang.Long",
+            "java.lang.String",
+            "java.lang.String"
+          ]
+        },
+        {
+          "name": "dispatch",
+          "parameterTypes": [
+            "com.involutionhell.backend.rag.indexing.workflow.IndexWorkflowCommand"
+          ]
+        },
+        {
+          "name": "enterChunking",
+          "parameterTypes": [
+            "com.involutionhell.backend.rag.indexing.workflow.IndexWorkflowCommand"
+          ]
+        },
+        {
+          "name": "enterCommitIndex",
+          "parameterTypes": [
+            "com.involutionhell.backend.rag.indexing.workflow.IndexWorkflowCommand"
+          ]
+        },
+        {
+          "name": "enterSaveChunks",
+          "parameterTypes": [
+            "com.involutionhell.backend.rag.indexing.workflow.IndexWorkflowCommand"
+          ]
+        },
+        {
+          "name": "enterVectorIndexing",
+          "parameterTypes": [
+            "com.involutionhell.backend.rag.indexing.workflow.IndexWorkflowCommand"
+          ]
+        },
+        {
+          "name": "queue",
+          "parameterTypes": [
+            "com.involutionhell.backend.rag.indexing.workflow.IndexWorkflowCommand"
+          ]
+        },
+        {
+          "name": "startAttempt",
+          "parameterTypes": [
+            "com.involutionhell.backend.rag.indexing.workflow.IndexWorkflowCommand"
+          ]
+        },
+        {
+          "name": "succeed",
+          "parameterTypes": [
+            "com.involutionhell.backend.rag.indexing.workflow.IndexWorkflowCommand"
           ]
         }
       ]
@@ -2394,19 +2997,6 @@
         {
           "name": "<init>",
           "parameterTypes": []
-        },
-        {
-          "name": "handleBusinessException",
-          "parameterTypes": [
-            "java.lang.Exception",
-            "org.springframework.http.server.reactive.ServerHttpRequest"
-          ]
-        },
-        {
-          "name": "handleResponseStatusException",
-          "parameterTypes": [
-            "org.springframework.web.server.ResponseStatusException"
-          ]
         }
       ]
     },
@@ -2966,7 +3556,7 @@
       "type": "com.involutionhell.backend.rag.retrieval.persistence.mybatis.RagAskRunEntity"
     },
     {
-      "type": "com.involutionhell.backend.rag.retrieval.persistence.mybatis.RagAskRunEntity_$$_jvstead_3",
+      "type": "com.involutionhell.backend.rag.retrieval.persistence.mybatis.RagAskRunEntity_$$_jvst5_7",
       "fields": [
         {
           "name": "_filter_signature"
@@ -3066,7 +3656,7 @@
       ]
     },
     {
-      "type": "com.involutionhell.backend.rag.retrieval.persistence.mybatis.RagConversationEntity_$$_jvstead_1",
+      "type": "com.involutionhell.backend.rag.retrieval.persistence.mybatis.RagConversationEntity_$$_jvst5_5",
       "fields": [
         {
           "name": "_filter_signature"
@@ -3168,7 +3758,7 @@
       ]
     },
     {
-      "type": "com.involutionhell.backend.rag.retrieval.persistence.mybatis.RagConversationMessageEntity_$$_jvstead_2",
+      "type": "com.involutionhell.backend.rag.retrieval.persistence.mybatis.RagConversationMessageEntity_$$_jvst5_6",
       "fields": [
         {
           "name": "_filter_signature"
@@ -3200,7 +3790,7 @@
       "type": "com.involutionhell.backend.rag.retrieval.persistence.mybatis.RagUserEntity"
     },
     {
-      "type": "com.involutionhell.backend.rag.retrieval.persistence.mybatis.RagUserEntity_$$_jvstead_0",
+      "type": "com.involutionhell.backend.rag.retrieval.persistence.mybatis.RagUserEntity_$$_jvst5_4",
       "fields": [
         {
           "name": "_filter_signature"
@@ -3883,6 +4473,12 @@
     {
       "type": "com.mybatisflex.core.provider.RowSqlProvider",
       "methods": [
+        {
+          "name": "deleteByQuery",
+          "parameterTypes": [
+            "java.util.Map"
+          ]
+        },
         {
           "name": "insert",
           "parameterTypes": [
@@ -5013,9 +5609,6 @@
       "type": "io.grpc.netty.shaded.io.netty.util.ReferenceCountUtil"
     },
     {
-      "type": "io.grpc.netty.shaded.io.netty.util.ResourceLeakDetector$DefaultResourceLeak"
-    },
-    {
       "type": "io.grpc.netty.shaded.io.netty.util.concurrent.DefaultPromise"
     },
     {
@@ -5901,6 +6494,9 @@
       "type": "io.netty.util.ReferenceCountUtil"
     },
     {
+      "type": "io.netty.util.ResourceLeakDetector$DefaultResourceLeak"
+    },
+    {
       "type": "io.netty.util.concurrent.ConcurrentSkipListIntObjMultimap"
     },
     {
@@ -6269,9 +6865,6 @@
     },
     {
       "type": "jakarta.mail.NoSuchProviderException"
-    },
-    {
-      "type": "jakarta.mail.Provider"
     },
     {
       "type": "jakarta.mail.Session"
@@ -7143,12 +7736,6 @@
       "type": "java.security.KeyStoreSpi"
     },
     {
-      "type": "java.security.interfaces.ECPrivateKey"
-    },
-    {
-      "type": "java.security.interfaces.ECPublicKey"
-    },
-    {
       "type": "java.security.interfaces.RSAPrivateKey"
     },
     {
@@ -7158,19 +7745,7 @@
       "type": "java.sql.CallableStatement"
     },
     {
-      "type": "java.sql.Connection",
-      "methods": [
-        {
-          "name": "getMetaData",
-          "parameterTypes": []
-        },
-        {
-          "name": "isValid",
-          "parameterTypes": [
-            "int"
-          ]
-        }
-      ]
+      "type": "java.sql.Connection"
     },
     {
       "type": "java.sql.ConnectionBuilder"
@@ -7257,9 +7832,6 @@
       "type": "java.util.Collections$UnmodifiableList"
     },
     {
-      "type": "java.util.Collections$UnmodifiableMap"
-    },
-    {
       "type": "java.util.Collections$UnmodifiableRandomAccessList"
     },
     {
@@ -7291,6 +7863,9 @@
     },
     {
       "type": "java.util.Iterator"
+    },
+    {
+      "type": "java.util.LinkedHashMap"
     },
     {
       "type": "java.util.List"
@@ -9095,39 +9670,6 @@
       "type": "org.eclipse.angus.activation.MimeTypeRegistryProviderImpl"
     },
     {
-      "type": "org.eclipse.angus.mail.imap.IMAPProvider"
-    },
-    {
-      "type": "org.eclipse.angus.mail.imap.IMAPSSLProvider"
-    },
-    {
-      "type": "org.eclipse.angus.mail.pop3.POP3Provider"
-    },
-    {
-      "type": "org.eclipse.angus.mail.pop3.POP3SSLProvider"
-    },
-    {
-      "type": "org.eclipse.angus.mail.smtp.SMTPProvider"
-    },
-    {
-      "type": "org.eclipse.angus.mail.smtp.SMTPSSLProvider"
-    },
-    {
-      "type": "org.eclipse.angus.mail.smtp.SMTPTransport",
-      "methods": [
-        {
-          "name": "<init>",
-          "parameterTypes": [
-            "jakarta.mail.Session",
-            "jakarta.mail.URLName"
-          ]
-        }
-      ]
-    },
-    {
-      "type": "org.eclipse.angus.mail.util.MailStreamProvider"
-    },
-    {
       "type": "org.eclipse.core.runtime.FileLocator"
     },
     {
@@ -9138,9 +9680,6 @@
     },
     {
       "type": "org.flywaydb.core.Flyway"
-    },
-    {
-      "type": "org.glassfish.hk2.osgiresourcelocator.ServiceLoader"
     },
     {
       "type": "org.h2.Driver"
@@ -10761,9 +11300,6 @@
       "type": "org.springframework.boot.actuate.endpoint.OperationFilter"
     },
     {
-      "type": "org.springframework.boot.actuate.endpoint.OperationResponseBody"
-    },
-    {
       "type": "org.springframework.boot.actuate.endpoint.OperationType"
     },
     {
@@ -11902,21 +12438,7 @@
       "type": "org.springframework.boot.health.actuate.endpoint.AdditionalHealthEndpointPath"
     },
     {
-      "type": "org.springframework.boot.health.actuate.endpoint.CompositeHealthDescriptor",
-      "methods": [
-        {
-          "name": "getComponents",
-          "parameterTypes": []
-        },
-        {
-          "name": "getDetails",
-          "parameterTypes": []
-        },
-        {
-          "name": "getStatus",
-          "parameterTypes": []
-        }
-      ]
+      "type": "org.springframework.boot.health.actuate.endpoint.CompositeHealthDescriptor"
     },
     {
       "type": "org.springframework.boot.health.actuate.endpoint.Contributor"
@@ -11946,30 +12468,7 @@
       "type": "org.springframework.boot.health.actuate.endpoint.HttpCodeStatusMapper"
     },
     {
-      "type": "org.springframework.boot.health.actuate.endpoint.IndicatedHealthDescriptor",
-      "methods": [
-        {
-          "name": "getDetails",
-          "parameterTypes": []
-        },
-        {
-          "name": "getStatus",
-          "parameterTypes": []
-        }
-      ]
-    },
-    {
-      "type": "org.springframework.boot.health.actuate.endpoint.ReactiveHealthEndpointWebExtension",
-      "methods": [
-        {
-          "name": "health",
-          "parameterTypes": [
-            "org.springframework.boot.actuate.endpoint.ApiVersion",
-            "org.springframework.boot.actuate.endpoint.web.WebServerNamespace",
-            "org.springframework.boot.actuate.endpoint.SecurityContext"
-          ]
-        }
-      ]
+      "type": "org.springframework.boot.health.actuate.endpoint.ReactiveHealthEndpointWebExtension"
     },
     {
       "type": "org.springframework.boot.health.actuate.endpoint.SimpleHttpCodeStatusMapper"
@@ -11979,15 +12478,6 @@
     },
     {
       "type": "org.springframework.boot.health.actuate.endpoint.StatusAggregator"
-    },
-    {
-      "type": "org.springframework.boot.health.actuate.endpoint.SystemHealthDescriptor",
-      "methods": [
-        {
-          "name": "getGroups",
-          "parameterTypes": []
-        }
-      ]
     },
     {
       "type": "org.springframework.boot.health.application.AvailabilityStateHealthIndicator"
@@ -12323,17 +12813,7 @@
       "type": "org.springframework.boot.health.contributor.ReactiveHealthContributors"
     },
     {
-      "type": "org.springframework.boot.health.contributor.Status",
-      "methods": [
-        {
-          "name": "getCode",
-          "parameterTypes": []
-        },
-        {
-          "name": "getDescription",
-          "parameterTypes": []
-        }
-      ]
+      "type": "org.springframework.boot.health.contributor.Status"
     },
     {
       "type": "org.springframework.boot.health.registry.AbstractRegistry"
@@ -14758,15 +15238,7 @@
       "type": "org.springframework.boot.webflux.actuate.endpoint.web.AbstractWebFluxEndpointHandlerMapping$ReactiveWebOperation"
     },
     {
-      "type": "org.springframework.boot.webflux.actuate.endpoint.web.AbstractWebFluxEndpointHandlerMapping$ReadOperationHandler",
-      "methods": [
-        {
-          "name": "handle",
-          "parameterTypes": [
-            "org.springframework.web.server.ServerWebExchange"
-          ]
-        }
-      ]
+      "type": "org.springframework.boot.webflux.actuate.endpoint.web.AbstractWebFluxEndpointHandlerMapping$ReadOperationHandler"
     },
     {
       "type": "org.springframework.boot.webflux.actuate.endpoint.web.AbstractWebFluxEndpointHandlerMapping$WriteOperationHandler"
@@ -15398,6 +15870,9 @@
       "type": "org.springframework.core.io.Resource"
     },
     {
+      "type": "org.springframework.core.io.buffer.DataBuffer"
+    },
+    {
       "type": "org.springframework.core.retry.RetryException"
     },
     {
@@ -15534,6 +16009,9 @@
     },
     {
       "type": "org.springframework.http.codec.multipart.DefaultPartHttpMessageReader"
+    },
+    {
+      "type": "org.springframework.http.codec.multipart.FilePart"
     },
     {
       "type": "org.springframework.http.codec.support.BaseCodecConfigurer"
@@ -15799,13 +16277,7 @@
       ]
     },
     {
-      "type": "org.springframework.modulith.moments.support.Moments",
-      "methods": [
-        {
-          "name": "everyHour",
-          "parameterTypes": []
-        }
-      ]
+      "type": "org.springframework.modulith.moments.support.Moments"
     },
     {
       "type": "org.springframework.modulith.moments.support.MomentsProperties",
@@ -16515,9 +16987,6 @@
       "type": "org.springframework.web.method.annotation.ExceptionHandlerMethodResolver"
     },
     {
-      "type": "org.springframework.web.multipart.MultipartFile"
-    },
-    {
       "type": "org.springframework.web.reactive.BindingContext"
     },
     {
@@ -16908,6 +17377,12 @@
       "type": "reactor.core.publisher.FluxArray$ArrayConditionalSubscription"
     },
     {
+      "type": "reactor.core.publisher.FluxArray$ArraySubscription"
+    },
+    {
+      "type": "reactor.core.publisher.FluxAutoConnectFuseable"
+    },
+    {
       "type": "reactor.core.publisher.FluxConcatArray$ConcatArraySubscriber"
     },
     {
@@ -16941,13 +17416,37 @@
       "type": "reactor.core.publisher.FluxFlattenIterable$FlattenIterableSubscriber"
     },
     {
+      "type": "reactor.core.publisher.FluxGenerate$GenerateSubscription"
+    },
+    {
       "type": "reactor.core.publisher.FluxIterable$IterableSubscription"
+    },
+    {
+      "type": "reactor.core.publisher.FluxIterable$IterableSubscriptionConditional"
     },
     {
       "type": "reactor.core.publisher.FluxOnErrorReturn$ReturnSubscriber"
     },
     {
+      "type": "reactor.core.publisher.FluxPublish$PubSubInner"
+    },
+    {
+      "type": "reactor.core.publisher.FluxPublish$PublishSubscriber"
+    },
+    {
       "type": "reactor.core.publisher.FluxPublishOn$PublishOnSubscriber"
+    },
+    {
+      "type": "reactor.core.publisher.FluxReplay"
+    },
+    {
+      "type": "reactor.core.publisher.FluxReplay$ReplayInner"
+    },
+    {
+      "type": "reactor.core.publisher.FluxReplay$ReplaySubscriber"
+    },
+    {
+      "type": "reactor.core.publisher.FluxRetryWhen$RetryWhenMainSubscriber"
     },
     {
       "type": "reactor.core.publisher.FluxSink"
@@ -16975,6 +17474,9 @@
     },
     {
       "type": "reactor.core.publisher.Hooks"
+    },
+    {
+      "type": "reactor.core.publisher.LambdaSubscriber"
     },
     {
       "type": "reactor.core.publisher.Mono"
@@ -17044,6 +17546,12 @@
     },
     {
       "type": "reactor.core.publisher.SinkEmptyMulticast"
+    },
+    {
+      "type": "reactor.core.publisher.SinkManyEmitterProcessor"
+    },
+    {
+      "type": "reactor.core.publisher.SinksSpecs$AbstractSerializedSink"
     },
     {
       "type": "reactor.core.scheduler.BoundedElasticThreadPerTaskScheduler"
@@ -17423,15 +17931,6 @@
       ]
     },
     {
-      "type": "sun.security.ssl.KeyManagerFactoryImpl$SunX509",
-      "methods": [
-        {
-          "name": "<init>",
-          "parameterTypes": []
-        }
-      ]
-    },
-    {
       "type": "sun.security.ssl.SSLContextImpl",
       "fields": [
         {
@@ -17444,15 +17943,6 @@
     },
     {
       "type": "sun.security.ssl.SSLContextImpl$CustomizedTLSContext"
-    },
-    {
-      "type": "sun.security.ssl.SSLContextImpl$DefaultSSLContext",
-      "methods": [
-        {
-          "name": "<init>",
-          "parameterTypes": []
-        }
-      ]
     },
     {
       "type": "sun.security.ssl.SSLContextImpl$TLSContext",
@@ -18081,13 +18571,6 @@
     {
       "type": {
         "proxy": [
-          "org.springframework.jdbc.datasource.ConnectionProxy"
-        ]
-      }
-    },
-    {
-      "type": {
-        "proxy": [
           "org.springframework.modulith.Modulithic"
         ]
       }
@@ -18320,22 +18803,10 @@
       "glob": "META-INF/build-info.properties"
     },
     {
-      "glob": "META-INF/jakarta.address.map"
-    },
-    {
-      "glob": "META-INF/jakarta.default.address.map"
-    },
-    {
-      "glob": "META-INF/jakarta.default.providers"
-    },
-    {
       "glob": "META-INF/jakarta.mime.types"
     },
     {
       "glob": "META-INF/jakarta.mimetypes.default"
-    },
-    {
-      "glob": "META-INF/jakarta.providers"
     },
     {
       "glob": "META-INF/mime.types"
@@ -18387,12 +18858,6 @@
     },
     {
       "glob": "META-INF/services/jakarta.el.ExpressionFactory"
-    },
-    {
-      "glob": "META-INF/services/jakarta.mail.Provider"
-    },
-    {
-      "glob": "META-INF/services/jakarta.mail.util.StreamProvider"
     },
     {
       "glob": "META-INF/services/jakarta.validation.ConstraintValidator"
@@ -18552,6 +19017,9 @@
     },
     {
       "glob": "\\[Lcom/involutionhell/backend/rag/indexing/workflow/IndexWorkflowTriggerType;.class"
+    },
+    {
+      "glob": "\\[Lcom/involutionhell/backend/rag/retrieval/api/RagConversationSummaryView;.class"
     },
     {
       "glob": "\\[Lcom/involutionhell/backend/rag/retrieval/harness/RagQueryHarnessStage;.class"
@@ -18728,13 +19196,16 @@
       "glob": "\\[Ljava/nio/ByteBuffer;.class"
     },
     {
+      "glob": "\\[Ljava/nio/file/OpenOption;.class"
+    },
+    {
+      "glob": "\\[Ljava/nio/file/attribute/FileAttribute;.class"
+    },
+    {
       "glob": "\\[Ljava/security/cert/Certificate;.class"
     },
     {
       "glob": "\\[Ljava/time/Duration;.class"
-    },
-    {
-      "glob": "\\[Ljava/time/LocalTime;.class"
     },
     {
       "glob": "\\[Ljava/time/OffsetDateTime;.class"
@@ -18990,6 +19461,9 @@
     },
     {
       "glob": "\\[Z.class"
+    },
+    {
+      "glob": "\\[\\[B.class"
     },
     {
       "glob": "\\[\\[I.class"
@@ -19608,6 +20082,9 @@
     },
     {
       "glob": "com/involutionhell/backend/rag/document/web/RagDocumentController$InferredUploadMetadata.class"
+    },
+    {
+      "glob": "com/involutionhell/backend/rag/document/web/RagDocumentController$UploadedMarkdown.class"
     },
     {
       "glob": "com/involutionhell/backend/rag/document/web/RagDocumentController.class"
@@ -21767,9 +22244,6 @@
       "glob": "java/beans/PropertyEditor.class"
     },
     {
-      "glob": "java/io/ByteArrayOutputStream.class"
-    },
-    {
       "glob": "java/io/Closeable.class"
     },
     {
@@ -22301,7 +22775,28 @@
       "glob": "java/nio/ShortBuffer.class"
     },
     {
+      "glob": "java/nio/channels/AsynchronousChannel.class"
+    },
+    {
+      "glob": "java/nio/channels/AsynchronousFileChannel.class"
+    },
+    {
       "glob": "java/nio/channels/Channel.class"
+    },
+    {
+      "glob": "java/nio/channels/CompletionHandler.class"
+    },
+    {
+      "glob": "java/nio/channels/FileChannel.class"
+    },
+    {
+      "glob": "java/nio/channels/FileLock.class"
+    },
+    {
+      "glob": "java/nio/channels/ReadableByteChannel.class"
+    },
+    {
+      "glob": "java/nio/channels/WritableByteChannel.class"
     },
     {
       "glob": "java/nio/charset/CharacterCodingException.class"
@@ -22322,7 +22817,13 @@
       "glob": "java/nio/charset/spi/CharsetProvider.class"
     },
     {
+      "glob": "java/nio/file/OpenOption.class"
+    },
+    {
       "glob": "java/nio/file/Path.class"
+    },
+    {
+      "glob": "java/nio/file/attribute/FileAttribute.class"
     },
     {
       "glob": "java/security/CodeSource.class"
@@ -23622,12 +24123,6 @@
     },
     {
       "glob": "org/apache/ibatis/type/UnknownTypeHandler.class"
-    },
-    {
-      "glob": "org/apache/logging/log4j/util/InternalApi.class"
-    },
-    {
-      "glob": "org/apache/logging/log4j/util/Strings.class"
     },
     {
       "glob": "org/apache/rocketmq/client/annotation/RocketMQMessageListener.class"
@@ -25751,6 +26246,15 @@
       "glob": "org/springframework/core/io/buffer/DataBufferFactory.class"
     },
     {
+      "glob": "org/springframework/core/io/buffer/DataBufferUtils$Matcher.class"
+    },
+    {
+      "glob": "org/springframework/core/io/buffer/DataBufferUtils$NestedMatcher.class"
+    },
+    {
+      "glob": "org/springframework/core/io/buffer/DataBufferUtils.class"
+    },
+    {
       "glob": "org/springframework/core/io/support/ResourcePatternResolver.class"
     },
     {
@@ -25947,6 +26451,12 @@
     },
     {
       "glob": "org/springframework/http/codec/ServerSentEvent.class"
+    },
+    {
+      "glob": "org/springframework/http/codec/multipart/FilePart.class"
+    },
+    {
+      "glob": "org/springframework/http/codec/multipart/Part.class"
     },
     {
       "glob": "org/springframework/http/server/RequestPath.class"
@@ -26402,9 +26912,6 @@
       "glob": "org/springframework/util/ReflectionUtils.class"
     },
     {
-      "glob": "org/springframework/util/StreamUtils.class"
-    },
-    {
       "glob": "org/springframework/util/StringUtils.class"
     },
     {
@@ -26502,9 +27009,6 @@
     },
     {
       "glob": "org/springframework/web/bind/support/WebExchangeBindException.class"
-    },
-    {
-      "glob": "org/springframework/web/multipart/MultipartFile.class"
     },
     {
       "glob": "org/springframework/web/reactive/config/DelegatingWebFluxConfiguration.class"
@@ -27243,10 +27747,6 @@
     },
     {
       "module": "java.base",
-      "glob": "java/io/ByteArrayOutputStream.class"
-    },
-    {
-      "module": "java.base",
       "glob": "java/io/Closeable.class"
     },
     {
@@ -27951,7 +28451,35 @@
     },
     {
       "module": "java.base",
+      "glob": "java/nio/channels/AsynchronousChannel.class"
+    },
+    {
+      "module": "java.base",
+      "glob": "java/nio/channels/AsynchronousFileChannel.class"
+    },
+    {
+      "module": "java.base",
       "glob": "java/nio/channels/Channel.class"
+    },
+    {
+      "module": "java.base",
+      "glob": "java/nio/channels/CompletionHandler.class"
+    },
+    {
+      "module": "java.base",
+      "glob": "java/nio/channels/FileChannel.class"
+    },
+    {
+      "module": "java.base",
+      "glob": "java/nio/channels/FileLock.class"
+    },
+    {
+      "module": "java.base",
+      "glob": "java/nio/channels/ReadableByteChannel.class"
+    },
+    {
+      "module": "java.base",
+      "glob": "java/nio/channels/WritableByteChannel.class"
     },
     {
       "module": "java.base",
@@ -27979,7 +28507,15 @@
     },
     {
       "module": "java.base",
+      "glob": "java/nio/file/OpenOption.class"
+    },
+    {
+      "module": "java.base",
       "glob": "java/nio/file/Path.class"
+    },
+    {
+      "module": "java.base",
+      "glob": "java/nio/file/attribute/FileAttribute.class"
     },
     {
       "module": "java.base",
