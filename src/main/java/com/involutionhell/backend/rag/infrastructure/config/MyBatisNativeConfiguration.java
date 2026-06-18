@@ -1,5 +1,6 @@
 package com.involutionhell.backend.rag.infrastructure.config;
 
+import com.involutionhell.backend.rag.retrieval.api.RagConversationSummaryView;
 import com.mybatisflex.core.BaseMapper;
 import com.mybatisflex.core.mybatis.FlexConfiguration;
 import com.mybatisflex.core.mybatis.FlexSqlSessionFactoryBuilder;
@@ -188,6 +189,20 @@ public class MyBatisNativeConfiguration {
             hints.proxies().registerJdkProxy(Executor.class);
             hints.proxies().registerJdkProxy(ResultSetHandler.class);
             hints.proxies().registerJdkProxy(ParameterHandler.class);
+
+            // Jackson 在序列化集合/构造器参数时会解析数组类型
+            hints.reflection().registerType(
+                    RagConversationSummaryView.class,
+                    MemberCategory.INVOKE_DECLARED_CONSTRUCTORS,
+                    MemberCategory.INVOKE_PUBLIC_CONSTRUCTORS,
+                    MemberCategory.INVOKE_DECLARED_METHODS,
+                    MemberCategory.INVOKE_PUBLIC_METHODS,
+                    MemberCategory.ACCESS_DECLARED_FIELDS
+            );
+
+            hints.reflection().registerType(
+                    RagConversationSummaryView[].class
+            );
         }
 
         /**
