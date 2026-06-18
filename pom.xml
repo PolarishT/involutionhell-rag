@@ -342,6 +342,16 @@
                 <artifactId>native-maven-plugin</artifactId>
                 <version>${native.maven.plugin.version}</version>
                 <extensions>true</extensions>
+                <configuration>
+                    <buildArgs>
+                        <buildArg>-march=compatibility</buildArg>
+                        <buildArg>--no-fallback</buildArg>
+                        <buildArg>--report-unsupported-elements-at-runtime</buildArg>
+                        <buildArg>--initialize-at-build-time=org.apache.ibatis.logging.LogFactory</buildArg>
+                        <buildArg>--initialize-at-build-time=org.apache.ibatis.logging.slf4j</buildArg>
+                        <buildArg>--initialize-at-build-time=org.slf4j.helpers.BasicMarker</buildArg>
+                    </buildArgs>
+                </configuration>
             </plugin>
 
             <!-- compiler -->
