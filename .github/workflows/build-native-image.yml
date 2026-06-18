@@ -31,6 +31,14 @@ jobs:
       IMAGE_REPOSITORY: ${{ secrets.DOCKERHUB_USERNAME }}/unsw-opensource
 
     steps:
+      - name: Set up GraalVM for Java 25
+        uses: graalvm/setup-graalvm@v1
+        with:
+          java-version: "25"
+          distribution: graalvm-community
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          cache: maven
+          components: native-image
       # ─────────────────────────────────────────────────────────────
       # Checkout
       # ─────────────────────────────────────────────────────────────
