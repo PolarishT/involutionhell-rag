@@ -1,0 +1,25 @@
+meta {
+  name: Get Index Timeline
+  type: http
+  seq: 7
+}
+
+get {
+  url: {{baseUrl}}/public/rag/documents/index-timeline/{{documentId}}
+  body: none
+  auth: none
+}
+
+headers {
+  Accept: application/json
+}
+
+tests {
+  test("returns the index timeline", function() {
+    expect(res.status).to.equal(200);
+    expect(res.body.success).to.equal(true);
+    expect(res.body.data.document.id).to.equal(Number(bru.getVar("documentId")));
+    expect(res.body.data.job.documentId).to.equal(Number(bru.getVar("documentId")));
+    expect(res.body.data.transitions).to.be.an("array");
+  });
+}

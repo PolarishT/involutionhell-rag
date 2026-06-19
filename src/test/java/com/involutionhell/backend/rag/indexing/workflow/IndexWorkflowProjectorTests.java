@@ -41,6 +41,30 @@ class IndexWorkflowProjectorTests {
         assertThat(documentIndexingSpi.requeueNote).isEqualTo("retry failed document");
     }
 
+    @Test
+    void requeuesCompletedStateByResettingTheWholeJob() {
+        RecordingDocumentIndexingSpi documentIndexingSpi = new RecordingDocumentIndexingSpi();
+        RecordingJobRepository jobRepository = new RecordingJobRepository();
+        IndexWorkflowProjector projector = new IndexWorkflowProjector(documentIndexingSpi, jobRepository);
+        IndexWorkflowCommand command = IndexWorkflowCommand.of(
+                8L,
+                "sha-8",
+                IndexWorkflowTriggerType.API,
+                "reindex"
+        );
+
+        projector.project(
+                IndexWorkflowState.COMPLETED,
+                IndexWorkflowState.QUEUED,
+                IndexWorkflowEvent.QUEUE,
+                command
+        );
+
+        assertThat(jobRepository.queuedDocumentId).isEqualTo(8L);
+        assertThat(jobRepository.updatedStageCount).isZero();
+        assertThat(jobRepository.annotatedEvent).isEqualTo(IndexWorkflowEvent.QUEUE.name());
+    }
+
     private static final class RecordingDocumentIndexingSpi implements DocumentIndexingSpi {
 
         private Long requeuedDocumentId;

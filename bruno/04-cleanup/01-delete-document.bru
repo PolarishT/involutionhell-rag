@@ -1,0 +1,23 @@
+meta {
+  name: Delete Document
+  type: http
+  seq: 1
+}
+
+delete {
+  url: {{baseUrl}}/public/rag/documents/del/{{documentId}}
+  body: none
+  auth: none
+}
+
+headers {
+  Accept: application/json
+}
+
+tests {
+  test("accepts the document deletion", function() {
+    expect(res.status).to.equal(200);
+    expect(res.body.success).to.equal(true);
+    expect(res.body.message).to.equal("文档已进入删除流程");
+  });
+}

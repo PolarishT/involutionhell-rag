@@ -58,7 +58,7 @@ public class RagDocumentController {
                         "文档已接收，开始索引",
                         documentCommandFacade.createDocument(request)
                 )
-        );
+        ).subscribeOn(Schedulers.boundedElastic());
     }
 
     @PostMapping(value = "/create", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
@@ -162,27 +162,41 @@ public class RagDocumentController {
 
 
     @GetMapping(value = "/get/{documentId}")
-    public ApiResponse<RagDocumentView> getDocument(@PathVariable @Positive Long documentId) {
-        return ApiResponse.ok(documentQueryFacade.getDocument(documentId));
+    public Mono<ApiResponse<RagDocumentView>> getDocument(@PathVariable @Positive Long documentId) {
+        return Mono.fromCallable(() ->
+                ApiResponse.ok(documentQueryFacade.getDocument(documentId))
+        ).subscribeOn(Schedulers.boundedElastic());
     }
 
     @PutMapping(value = "/update/{documentId}", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public ApiResponse<RagDocumentView> updateDocument(
+    public Mono<ApiResponse<RagDocumentView>> updateDocument(
             @PathVariable @Positive Long documentId,
             @Valid @RequestBody RagDocumentUpdateRequest request
     ) {
-        return ApiResponse.ok("文档已更新，开始重建索引", documentCommandFacade.updateDocument(documentId, request));
+        return Mono.fromCallable(() ->
+                ApiResponse.ok(
+                        "文档已更新，开始重建索引",
+                        documentCommandFacade.updateDocument(documentId, request)
+                )
+        ).subscribeOn(Schedulers.boundedElastic());
     }
 
     @PostMapping(value = "/reindex/{documentId}")
-    public ApiResponse<RagDocumentView> reindexDocument(@PathVariable @Positive Long documentId) {
-        return ApiResponse.ok("文档已重新提交索引", documentCommandFacade.reindexDocument(documentId));
+    public Mono<ApiResponse<RagDocumentView>> reindexDocument(@PathVariable @Positive Long documentId) {
+        return Mono.fromCallable(() ->
+                ApiResponse.ok(
+                        "文档已重新提交索引",
+                        documentCommandFacade.reindexDocument(documentId)
+                )
+        ).subscribeOn(Schedulers.boundedElastic());
     }
 
     @DeleteMapping(value = "/del/{documentId}")
-    public ApiResponse<Void> deleteDocument(@PathVariable @Positive Long documentId) {
-        documentCommandFacade.deleteDocument(documentId);
-        return ApiResponse.okMessage("文档已进入删除流程");
+    public Mono<ApiResponse<Void>> deleteDocument(@PathVariable @Positive Long documentId) {
+        return Mono.fromCallable(() -> {
+            documentCommandFacade.deleteDocument(documentId);
+            return ApiResponse.okMessage("文档已进入删除流程");
+        }).subscribeOn(Schedulers.boundedElastic());
     }
 
     private String resolveOriginalFilename(FilePart file) {

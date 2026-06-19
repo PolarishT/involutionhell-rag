@@ -1,0 +1,44 @@
+meta {
+  name: Update Document
+  type: http
+  seq: 4
+}
+
+put {
+  url: {{baseUrl}}/public/rag/documents/update/{{documentId}}
+  body: json
+  auth: none
+}
+
+headers {
+  Accept: application/json
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "sourceType": "markdown",
+    "sourceUri": "bruno://json/document-updated",
+    "externalRef": "bruno-json-001",
+    "title": "Bruno JSON Document Updated",
+    "content": "# Bruno JSON Document Updated\n\nThis updated document verifies the PUT endpoint and index rebuild flow.\n\n## Bruno\n\nAll public RAG web endpoints are covered by executable requests.",
+    "metadata": {
+      "tags": [
+        "bruno",
+        "api",
+        "updated"
+      ],
+      "testSuite": "bruno"
+    }
+  }
+}
+
+tests {
+  test("updates the document", function() {
+    expect(res.status).to.equal(200);
+    expect(res.body.success).to.equal(true);
+    expect(res.body.data.id).to.equal(Number(bru.getVar("documentId")));
+    expect(res.body.data.title).to.equal("Bruno JSON Document Updated");
+    expect(res.body.data.sourceUri).to.equal("bruno://json/document-updated");
+  });
+}

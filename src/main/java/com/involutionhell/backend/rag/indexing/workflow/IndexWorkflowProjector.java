@@ -42,8 +42,10 @@ public class IndexWorkflowProjector {
 
         switch (toState) {
             case QUEUED -> {
-                if (fromState == IndexWorkflowState.NEW || fromState == IndexWorkflowState.FAILED) {
-                    // 全新创建或失败重排队，内部使用 update-first/insert-fallback 防御并发写入。
+                if (fromState == IndexWorkflowState.NEW || fromState.terminal()) {
+                    // 全新创建或终态任务重排队时必须同时重置 status/stage/attempt 等字段。
+                    // 仅把 COMPLETED/SKIPPED 的 stage 改回 QUEUED 会遗留 SUCCEEDED/SKIPPED status，
+                    // 下一次恢复状态时仍会被识别为终态，导致显式 reindex 无法继续 dispatch。
                     jobRepository.queue(documentId, contentSha256);
                 } else {
                     // 重复排队，基于旧状态进行原子重置

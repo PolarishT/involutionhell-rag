@@ -1,20 +1,22 @@
 package com.involutionhell.backend.rag.shared.persistence;
 
-import com.mybatisflex.core.row.DbChain;
 import java.sql.Connection;
 import java.sql.SQLException;
 import javax.sql.DataSource;
+import org.springframework.jdbc.core.simple.JdbcClient;
 import org.springframework.stereotype.Component;
 
 @Component
 public class RagDatabaseDialect {
 
     private final DataSource dataSource;
+    private final JdbcClient jdbcClient;
     private volatile Boolean postgreSql;
     private volatile Boolean pgTrgmEnabled;
 
-    public RagDatabaseDialect(DataSource dataSource) {
+    public RagDatabaseDialect(DataSource dataSource, JdbcClient jdbcClient) {
         this.dataSource = dataSource;
+        this.jdbcClient = jdbcClient;
     }
 
     public boolean isPostgreSql() {
@@ -64,9 +66,10 @@ public class RagDatabaseDialect {
 
     private boolean detectPgTrgmEnabled() {
         try {
-            return DbChain.table("pg_extension")
-                    .where("extname = ?", "pg_trgm")
-                    .exists();
+            return jdbcClient.sql("SELECT EXISTS (SELECT 1 FROM pg_extension WHERE extname = :extension)")
+                    .param("extension", "pg_trgm")
+                    .query(Boolean.class)
+                    .single();
         } catch (RuntimeException exception) {
             return false;
         }

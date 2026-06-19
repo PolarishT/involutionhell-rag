@@ -1,0 +1,26 @@
+meta {
+  name: Get Index Job
+  type: http
+  seq: 6
+}
+
+get {
+  url: {{baseUrl}}/public/rag/documents/index-job/{{documentId}}
+  body: none
+  auth: none
+}
+
+headers {
+  Accept: application/json
+}
+
+tests {
+  test("returns the current index job", function() {
+    expect(res.status).to.equal(200);
+    expect(res.body.success).to.equal(true);
+    expect(res.body.data).to.be.an("object");
+    expect(res.body.data.documentId).to.equal(Number(bru.getVar("documentId")));
+    expect(res.body.data.status).to.be.a("string");
+    expect(res.body.data.stage).to.be.a("string");
+  });
+}

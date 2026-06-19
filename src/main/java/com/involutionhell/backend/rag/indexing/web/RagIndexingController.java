@@ -11,6 +11,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Schedulers;
 
 @RestController
 @Validated
@@ -27,8 +29,10 @@ public class RagIndexingController {
      * 返回当前文档版本对应的离线索引 job 快照，便于排查当前阶段、状态与 messageId。
      */
     @GetMapping(value = "/index-job/{documentId}")
-    public ApiResponse<RagIndexJobView> getIndexJob(@PathVariable @Positive Long documentId) {
-        return ApiResponse.ok(indexingQueryFacade.getIndexJob(documentId));
+    public Mono<ApiResponse<RagIndexJobView>> getIndexJob(@PathVariable @Positive Long documentId) {
+        return Mono.fromCallable(() ->
+                ApiResponse.ok(indexingQueryFacade.getIndexJob(documentId))
+        ).subscribeOn(Schedulers.boundedElastic());
     }
 
     /**
@@ -36,7 +40,9 @@ public class RagIndexingController {
      * 其中 outbox.messageId 会直接透给调用方，方便与 MQ 消费侧日志对账。
      */
     @GetMapping(value = "/index-timeline/{documentId}")
-    public ApiResponse<RagIndexTimelineView> getIndexTimeline(@PathVariable @Positive Long documentId) {
-        return ApiResponse.ok(indexingQueryFacade.getIndexTimeline(documentId));
+    public Mono<ApiResponse<RagIndexTimelineView>> getIndexTimeline(@PathVariable @Positive Long documentId) {
+        return Mono.fromCallable(() ->
+                ApiResponse.ok(indexingQueryFacade.getIndexTimeline(documentId))
+        ).subscribeOn(Schedulers.boundedElastic());
     }
 }

@@ -1,0 +1,32 @@
+meta {
+  name: Update Conversation
+  type: http
+  seq: 4
+}
+
+post {
+  url: {{baseUrl}}/public/rag/conversations/{{conversationId}}/update
+  body: json
+  auth: none
+}
+
+headers {
+  Accept: application/json
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "userId": "{{userId}}",
+    "title": "Bruno API Regression",
+    "status": "ACTIVE"
+  }
+}
+
+tests {
+  test("updates the conversation summary", function() {
+    expect(res.status).to.equal(200);
+    expect(res.body.data.conversationId).to.equal(bru.getEnvVar("conversationId"));
+    expect(res.body.data.title).to.equal("Bruno API Regression");
+  });
+}

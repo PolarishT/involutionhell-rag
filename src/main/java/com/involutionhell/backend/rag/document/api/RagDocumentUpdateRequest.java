@@ -1,6 +1,7 @@
 package com.involutionhell.backend.rag.document.api;
 
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotEmpty;
 import java.util.Map;
 
 /**
@@ -23,7 +24,7 @@ public record RagDocumentUpdateRequest(
         String title,
         @NotBlank(message = "文档内容不能为空")
         String content,
-        @NotBlank(message = "元数据信息不能为空")
+        @NotEmpty(message = "元数据信息不能为空")
         Map<String, Object> metadata
 ) {
 }

@@ -4,9 +4,6 @@
       "type": "android.app.Application"
     },
     {
-      "type": "android.os.Build$VERSION"
-    },
-    {
       "type": "apple.security.AppleProvider",
       "methods": [
         {
@@ -36,9 +33,6 @@
           "parameterTypes": []
         }
       ]
-    },
-    {
-      "type": "ch.qos.logback.classic.Logger"
     },
     {
       "type": "ch.qos.logback.classic.LoggerContext"
@@ -340,9 +334,6 @@
       "type": "com.fasterxml.jackson.module.paramnames.ParameterNamesModule"
     },
     {
-      "type": "com.github.gavlyukovskiy.boot.jdbc.decorator.DecoratedDataSource"
-    },
-    {
       "type": "com.google.common.util.concurrent.AbstractFutureState"
     },
     {
@@ -353,9 +344,6 @@
     },
     {
       "type": "com.google.gson.Gson"
-    },
-    {
-      "type": "com.google.gson.internal.LinkedTreeMap"
     },
     {
       "type": "com.google.protobuf.DescriptorMessageInfoFactory",
@@ -414,7 +402,13 @@
       ]
     },
     {
-      "type": "com.involutionhell.backend.rag.common.api.DataResponse"
+      "type": "com.involutionhell.backend.rag.common.api.DataResponse",
+      "methods": [
+        {
+          "name": "data",
+          "parameterTypes": []
+        }
+      ]
     },
     {
       "type": "com.involutionhell.backend.rag.common.error.GlobalExceptionHandler",
@@ -450,10 +444,73 @@
       "type": "com.involutionhell.backend.rag.document.api.DocumentQueryFacade"
     },
     {
-      "type": "com.involutionhell.backend.rag.document.api.RagDocumentCreateRequest"
+      "type": "com.involutionhell.backend.rag.document.api.RagDocumentCreateRequest",
+      "fields": [
+        {
+          "name": "content"
+        },
+        {
+          "name": "externalRef"
+        },
+        {
+          "name": "metadata"
+        },
+        {
+          "name": "sourceType"
+        },
+        {
+          "name": "sourceUri"
+        },
+        {
+          "name": "title"
+        }
+      ],
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": [
+            "java.lang.String",
+            "java.lang.String",
+            "java.lang.String",
+            "java.lang.String",
+            "java.lang.String",
+            "java.util.Map"
+          ]
+        }
+      ]
     },
     {
-      "type": "com.involutionhell.backend.rag.document.api.RagDocumentUpdateRequest"
+      "type": "com.involutionhell.backend.rag.document.api.RagDocumentUpdateRequest",
+      "fields": [
+        {
+          "name": "content"
+        },
+        {
+          "name": "metadata"
+        },
+        {
+          "name": "sourceType"
+        },
+        {
+          "name": "sourceUri"
+        },
+        {
+          "name": "title"
+        }
+      ],
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": [
+            "java.lang.String",
+            "java.lang.String",
+            "java.lang.String",
+            "java.lang.String",
+            "java.lang.String",
+            "java.util.Map"
+          ]
+        }
+      ]
     },
     {
       "type": "com.involutionhell.backend.rag.document.api.RagDocumentView",
@@ -532,6 +589,25 @@
           "parameterTypes": [
             "com.involutionhell.backend.rag.document.api.RagDocumentCreateRequest"
           ]
+        },
+        {
+          "name": "deleteDocument",
+          "parameterTypes": [
+            "java.lang.Long"
+          ]
+        },
+        {
+          "name": "reindexDocument",
+          "parameterTypes": [
+            "java.lang.Long"
+          ]
+        },
+        {
+          "name": "updateDocument",
+          "parameterTypes": [
+            "java.lang.Long",
+            "com.involutionhell.backend.rag.document.api.RagDocumentUpdateRequest"
+          ]
         }
       ]
     },
@@ -581,41 +657,12 @@
       "type": "com.involutionhell.backend.rag.document.persistence.RagDocumentRepository"
     },
     {
-      "type": "com.involutionhell.backend.rag.document.persistence.mybatis.DocumentMyBatisFlexConfiguration"
-    },
-    {
-      "type": "com.involutionhell.backend.rag.document.persistence.mybatis.DocumentMyBatisFlexConfiguration$$SpringCGLIB$$0",
-      "fields": [
-        {
-          "name": "$$beanFactory"
-        },
-        {
-          "name": "CGLIB$CALLBACK_FILTER"
-        },
-        {
-          "name": "CGLIB$FACTORY_DATA"
-        }
-      ],
-      "methods": [
-        {
-          "name": "<init>",
-          "parameterTypes": []
-        },
-        {
-          "name": "CGLIB$SET_STATIC_CALLBACKS",
-          "parameterTypes": [
-            "org.springframework.cglib.proxy.Callback[]"
-          ]
-        }
-      ]
-    },
-    {
-      "type": "com.involutionhell.backend.rag.document.persistence.mybatis.MyBatisFlexRagDocumentRepository",
+      "type": "com.involutionhell.backend.rag.document.persistence.jdbc.JdbcRagDocumentRepository",
       "methods": [
         {
           "name": "<init>",
           "parameterTypes": [
-            "com.involutionhell.backend.rag.document.persistence.mybatis.RagDocumentMapper",
+            "org.springframework.jdbc.core.simple.JdbcClient",
             "com.involutionhell.backend.rag.shared.support.RagJsonCodec",
             "com.involutionhell.backend.rag.shared.persistence.RagDatabaseDialect"
           ]
@@ -655,6 +702,20 @@
           ]
         },
         {
+          "name": "markDeleting",
+          "parameterTypes": [
+            "java.lang.Long",
+            "java.lang.String"
+          ]
+        },
+        {
+          "name": "markFailed",
+          "parameterTypes": [
+            "java.lang.Long",
+            "java.lang.String"
+          ]
+        },
+        {
           "name": "markIndexed",
           "parameterTypes": [
             "java.lang.Long",
@@ -686,11 +747,24 @@
             "java.lang.String",
             "java.util.Map"
           ]
+        },
+        {
+          "name": "update",
+          "parameterTypes": [
+            "java.lang.Long",
+            "java.lang.String",
+            "java.lang.String",
+            "java.lang.String",
+            "java.lang.String",
+            "java.lang.String",
+            "java.lang.String",
+            "java.util.Map"
+          ]
         }
       ]
     },
     {
-      "type": "com.involutionhell.backend.rag.document.persistence.mybatis.MyBatisFlexRagDocumentRepository$$SpringCGLIB$$0",
+      "type": "com.involutionhell.backend.rag.document.persistence.jdbc.JdbcRagDocumentRepository$$SpringCGLIB$$0",
       "fields": [
         {
           "name": "CGLIB$CALLBACK_FILTER"
@@ -699,149 +773,6 @@
           "name": "CGLIB$FACTORY_DATA"
         }
       ]
-    },
-    {
-      "type": "com.involutionhell.backend.rag.document.persistence.mybatis.RagDocumentEntity",
-      "methods": [
-        {
-          "name": "<init>",
-          "parameterTypes": []
-        },
-        {
-          "name": "setAttemptCount",
-          "parameterTypes": [
-            "java.lang.Integer"
-          ]
-        },
-        {
-          "name": "setChunkCount",
-          "parameterTypes": [
-            "java.lang.Integer"
-          ]
-        },
-        {
-          "name": "setContent",
-          "parameterTypes": [
-            "java.lang.String"
-          ]
-        },
-        {
-          "name": "setContentSha256",
-          "parameterTypes": [
-            "java.lang.String"
-          ]
-        },
-        {
-          "name": "setCreatedAt",
-          "parameterTypes": [
-            "java.time.OffsetDateTime"
-          ]
-        },
-        {
-          "name": "setId",
-          "parameterTypes": [
-            "java.lang.Long"
-          ]
-        },
-        {
-          "name": "setIndexedAt",
-          "parameterTypes": [
-            "java.time.OffsetDateTime"
-          ]
-        },
-        {
-          "name": "setIndexedGeneration",
-          "parameterTypes": [
-            "java.lang.Long"
-          ]
-        },
-        {
-          "name": "setLastAttemptedAt",
-          "parameterTypes": [
-            "java.time.OffsetDateTime"
-          ]
-        },
-        {
-          "name": "setMetadata",
-          "parameterTypes": [
-            "java.lang.String"
-          ]
-        },
-        {
-          "name": "setSourceType",
-          "parameterTypes": [
-            "java.lang.String"
-          ]
-        },
-        {
-          "name": "setSourceUri",
-          "parameterTypes": [
-            "java.lang.String"
-          ]
-        },
-        {
-          "name": "setStatus",
-          "parameterTypes": [
-            "java.lang.String"
-          ]
-        },
-        {
-          "name": "setTitle",
-          "parameterTypes": [
-            "java.lang.String"
-          ]
-        },
-        {
-          "name": "setUpdatedAt",
-          "parameterTypes": [
-            "java.time.OffsetDateTime"
-          ]
-        }
-      ]
-    },
-    {
-      "type": "com.involutionhell.backend.rag.document.persistence.mybatis.RagDocumentEntity_$$_jvst5_1",
-      "fields": [
-        {
-          "name": "_filter_signature"
-        }
-      ],
-      "methods": [
-        {
-          "name": "<init>",
-          "parameterTypes": []
-        },
-        {
-          "name": "_d21getUpdates",
-          "parameterTypes": []
-        },
-        {
-          "name": "_d2finalize",
-          "parameterTypes": []
-        },
-        {
-          "name": "_d40set",
-          "parameterTypes": [
-            "java.lang.String",
-            "java.lang.Object",
-            "boolean"
-          ]
-        },
-        {
-          "name": "_d67setRaw",
-          "parameterTypes": [
-            "java.lang.String",
-            "java.lang.Object",
-            "boolean"
-          ]
-        }
-      ]
-    },
-    {
-      "type": "com.involutionhell.backend.rag.document.persistence.mybatis.RagDocumentMapper"
-    },
-    {
-      "type": "com.involutionhell.backend.rag.document.persistence.mybatis.table.RagDocumentEntityTableDef"
     },
     {
       "type": "com.involutionhell.backend.rag.document.spi.DocumentIndexingSpi"
@@ -866,7 +797,38 @@
         {
           "name": "createDocument",
           "parameterTypes": [
+            "com.involutionhell.backend.rag.document.api.RagDocumentCreateRequest"
+          ]
+        },
+        {
+          "name": "createDocument",
+          "parameterTypes": [
             "org.springframework.http.codec.multipart.FilePart"
+          ]
+        },
+        {
+          "name": "deleteDocument",
+          "parameterTypes": [
+            "java.lang.Long"
+          ]
+        },
+        {
+          "name": "getDocument",
+          "parameterTypes": [
+            "java.lang.Long"
+          ]
+        },
+        {
+          "name": "reindexDocument",
+          "parameterTypes": [
+            "java.lang.Long"
+          ]
+        },
+        {
+          "name": "updateDocument",
+          "parameterTypes": [
+            "java.lang.Long",
+            "com.involutionhell.backend.rag.document.api.RagDocumentUpdateRequest"
           ]
         }
       ]
@@ -1187,6 +1149,12 @@
           ]
         },
         {
+          "name": "cleanupPendingIndexing",
+          "parameterTypes": [
+            "java.lang.Long"
+          ]
+        },
+        {
           "name": "requestIndexing",
           "parameterTypes": [
             "java.lang.Long",
@@ -1214,6 +1182,12 @@
           "name": "<init>",
           "parameterTypes": [
             "com.involutionhell.backend.rag.indexing.api.IndexingCommandFacade"
+          ]
+        },
+        {
+          "name": "onDocumentIndexCleanupRequested",
+          "parameterTypes": [
+            "com.involutionhell.backend.rag.document.api.DocumentIndexCleanupRequestedEvent"
           ]
         },
         {
@@ -1485,6 +1459,9 @@
       "type": "com.involutionhell.backend.rag.indexing.model.RagIndexFailure"
     },
     {
+      "type": "com.involutionhell.backend.rag.indexing.model.RagIndexJobStatus"
+    },
+    {
       "type": "com.involutionhell.backend.rag.indexing.model.RagIndexOutboxEventType"
     },
     {
@@ -1539,41 +1516,12 @@
       "type": "com.involutionhell.backend.rag.indexing.persistence.RagIndexOutboxRepository"
     },
     {
-      "type": "com.involutionhell.backend.rag.indexing.persistence.mybatis.IndexingMyBatisFlexConfiguration"
-    },
-    {
-      "type": "com.involutionhell.backend.rag.indexing.persistence.mybatis.IndexingMyBatisFlexConfiguration$$SpringCGLIB$$0",
-      "fields": [
-        {
-          "name": "$$beanFactory"
-        },
-        {
-          "name": "CGLIB$CALLBACK_FILTER"
-        },
-        {
-          "name": "CGLIB$FACTORY_DATA"
-        }
-      ],
-      "methods": [
-        {
-          "name": "<init>",
-          "parameterTypes": []
-        },
-        {
-          "name": "CGLIB$SET_STATIC_CALLBACKS",
-          "parameterTypes": [
-            "org.springframework.cglib.proxy.Callback[]"
-          ]
-        }
-      ]
-    },
-    {
-      "type": "com.involutionhell.backend.rag.indexing.persistence.mybatis.MyBatisFlexRagChunkRepository",
+      "type": "com.involutionhell.backend.rag.indexing.persistence.jdbc.JdbcRagChunkRepository",
       "methods": [
         {
           "name": "<init>",
           "parameterTypes": [
-            "com.involutionhell.backend.rag.indexing.persistence.mybatis.RagChunkMapper",
+            "org.springframework.jdbc.core.simple.JdbcClient",
             "com.involutionhell.backend.rag.shared.support.RagJsonCodec",
             "com.involutionhell.backend.rag.shared.persistence.RagDatabaseDialect"
           ]
@@ -1599,23 +1547,10 @@
           ]
         },
         {
-          "name": "findKeywordCandidates",
-          "parameterTypes": [
-            "java.util.Set",
-            "int"
-          ]
-        },
-        {
           "name": "findMaxChunkIndexByDocumentIdExceptGeneration",
           "parameterTypes": [
             "java.lang.Long",
             "java.lang.Long"
-          ]
-        },
-        {
-          "name": "findSearchableByVectorIds",
-          "parameterTypes": [
-            "java.util.List"
           ]
         },
         {
@@ -1641,7 +1576,7 @@
       ]
     },
     {
-      "type": "com.involutionhell.backend.rag.indexing.persistence.mybatis.MyBatisFlexRagChunkRepository$$SpringCGLIB$$0",
+      "type": "com.involutionhell.backend.rag.indexing.persistence.jdbc.JdbcRagChunkRepository$$SpringCGLIB$$0",
       "fields": [
         {
           "name": "CGLIB$CALLBACK_FILTER"
@@ -1652,12 +1587,12 @@
       ]
     },
     {
-      "type": "com.involutionhell.backend.rag.indexing.persistence.mybatis.MyBatisFlexRagEmbeddingCacheRepository",
+      "type": "com.involutionhell.backend.rag.indexing.persistence.jdbc.JdbcRagEmbeddingCacheRepository",
       "methods": [
         {
           "name": "<init>",
           "parameterTypes": [
-            "com.involutionhell.backend.rag.indexing.persistence.mybatis.RagEmbeddingCacheMapper",
+            "org.springframework.jdbc.core.simple.JdbcClient",
             "com.involutionhell.backend.rag.shared.persistence.RagNestedTransactionExecutor"
           ]
         },
@@ -1668,17 +1603,11 @@
             "java.lang.String",
             "int"
           ]
-        },
-        {
-          "name": "saveAll",
-          "parameterTypes": [
-            "java.util.List"
-          ]
         }
       ]
     },
     {
-      "type": "com.involutionhell.backend.rag.indexing.persistence.mybatis.MyBatisFlexRagEmbeddingCacheRepository$$SpringCGLIB$$0",
+      "type": "com.involutionhell.backend.rag.indexing.persistence.jdbc.JdbcRagEmbeddingCacheRepository$$SpringCGLIB$$0",
       "fields": [
         {
           "name": "CGLIB$CALLBACK_FILTER"
@@ -1689,12 +1618,15 @@
       ]
     },
     {
-      "type": "com.involutionhell.backend.rag.indexing.persistence.mybatis.MyBatisFlexRagIndexJobRepository",
+      "type": "com.involutionhell.backend.rag.indexing.persistence.jdbc.JdbcRagEmbeddingCacheRepository$CacheEntry"
+    },
+    {
+      "type": "com.involutionhell.backend.rag.indexing.persistence.jdbc.JdbcRagIndexJobRepository",
       "methods": [
         {
           "name": "<init>",
           "parameterTypes": [
-            "com.involutionhell.backend.rag.indexing.persistence.mybatis.RagIndexJobMapper",
+            "org.springframework.jdbc.core.simple.JdbcClient",
             "com.involutionhell.backend.rag.shared.persistence.RagNestedTransactionExecutor"
           ]
         },
@@ -1726,6 +1658,25 @@
           "parameterTypes": [
             "java.time.OffsetDateTime",
             "int"
+          ]
+        },
+        {
+          "name": "markFailed",
+          "parameterTypes": [
+            "java.lang.Long",
+            "java.lang.String",
+            "com.involutionhell.backend.rag.indexing.model.RagIndexStage",
+            "com.involutionhell.backend.rag.indexing.model.RagIndexStage",
+            "java.lang.String"
+          ]
+        },
+        {
+          "name": "markSkipped",
+          "parameterTypes": [
+            "java.lang.Long",
+            "java.lang.String",
+            "com.involutionhell.backend.rag.indexing.model.RagIndexStage",
+            "java.lang.String"
           ]
         },
         {
@@ -1765,7 +1716,7 @@
       ]
     },
     {
-      "type": "com.involutionhell.backend.rag.indexing.persistence.mybatis.MyBatisFlexRagIndexJobRepository$$SpringCGLIB$$0",
+      "type": "com.involutionhell.backend.rag.indexing.persistence.jdbc.JdbcRagIndexJobRepository$$SpringCGLIB$$0",
       "fields": [
         {
           "name": "CGLIB$CALLBACK_FILTER"
@@ -1776,12 +1727,12 @@
       ]
     },
     {
-      "type": "com.involutionhell.backend.rag.indexing.persistence.mybatis.MyBatisFlexRagIndexJobTransitionRepository",
+      "type": "com.involutionhell.backend.rag.indexing.persistence.jdbc.JdbcRagIndexJobTransitionRepository",
       "methods": [
         {
           "name": "<init>",
           "parameterTypes": [
-            "com.involutionhell.backend.rag.indexing.persistence.mybatis.RagIndexJobTransitionMapper",
+            "org.springframework.jdbc.core.simple.JdbcClient",
             "com.involutionhell.backend.rag.shared.support.RagJsonCodec",
             "com.involutionhell.backend.rag.shared.persistence.RagDatabaseDialect"
           ]
@@ -1815,7 +1766,7 @@
       ]
     },
     {
-      "type": "com.involutionhell.backend.rag.indexing.persistence.mybatis.MyBatisFlexRagIndexJobTransitionRepository$$SpringCGLIB$$0",
+      "type": "com.involutionhell.backend.rag.indexing.persistence.jdbc.JdbcRagIndexJobTransitionRepository$$SpringCGLIB$$0",
       "fields": [
         {
           "name": "CGLIB$CALLBACK_FILTER"
@@ -1826,12 +1777,12 @@
       ]
     },
     {
-      "type": "com.involutionhell.backend.rag.indexing.persistence.mybatis.MyBatisFlexRagIndexMessageFailureRepository",
+      "type": "com.involutionhell.backend.rag.indexing.persistence.jdbc.JdbcRagIndexMessageFailureRepository",
       "methods": [
         {
           "name": "<init>",
           "parameterTypes": [
-            "com.involutionhell.backend.rag.indexing.persistence.mybatis.RagIndexMessageFailureMapper",
+            "org.springframework.jdbc.core.simple.JdbcClient",
             "com.involutionhell.backend.rag.shared.support.RagJsonCodec",
             "com.involutionhell.backend.rag.shared.persistence.RagDatabaseDialect"
           ]
@@ -1839,7 +1790,7 @@
       ]
     },
     {
-      "type": "com.involutionhell.backend.rag.indexing.persistence.mybatis.MyBatisFlexRagIndexMessageFailureRepository$$SpringCGLIB$$0",
+      "type": "com.involutionhell.backend.rag.indexing.persistence.jdbc.JdbcRagIndexMessageFailureRepository$$SpringCGLIB$$0",
       "fields": [
         {
           "name": "CGLIB$CALLBACK_FILTER"
@@ -1850,12 +1801,12 @@
       ]
     },
     {
-      "type": "com.involutionhell.backend.rag.indexing.persistence.mybatis.MyBatisFlexRagIndexOutboxRepository",
+      "type": "com.involutionhell.backend.rag.indexing.persistence.jdbc.JdbcRagIndexOutboxRepository",
       "methods": [
         {
           "name": "<init>",
           "parameterTypes": [
-            "com.involutionhell.backend.rag.indexing.persistence.mybatis.RagIndexOutboxMapper",
+            "org.springframework.jdbc.core.simple.JdbcClient",
             "com.involutionhell.backend.rag.shared.persistence.RagNestedTransactionExecutor"
           ]
         },
@@ -1865,6 +1816,12 @@
             "java.lang.Long",
             "java.lang.String",
             "java.lang.String"
+          ]
+        },
+        {
+          "name": "deleteByDocumentId",
+          "parameterTypes": [
+            "java.lang.Long"
           ]
         },
         {
@@ -1912,7 +1869,7 @@
       ]
     },
     {
-      "type": "com.involutionhell.backend.rag.indexing.persistence.mybatis.MyBatisFlexRagIndexOutboxRepository$$SpringCGLIB$$0",
+      "type": "com.involutionhell.backend.rag.indexing.persistence.jdbc.JdbcRagIndexOutboxRepository$$SpringCGLIB$$0",
       "fields": [
         {
           "name": "CGLIB$CALLBACK_FILTER"
@@ -1921,510 +1878,6 @@
           "name": "CGLIB$FACTORY_DATA"
         }
       ]
-    },
-    {
-      "type": "com.involutionhell.backend.rag.indexing.persistence.mybatis.RagChunkEntity",
-      "methods": [
-        {
-          "name": "<init>",
-          "parameterTypes": []
-        },
-        {
-          "name": "setCharCount",
-          "parameterTypes": [
-            "java.lang.Integer"
-          ]
-        },
-        {
-          "name": "setChunkHash",
-          "parameterTypes": [
-            "java.lang.String"
-          ]
-        },
-        {
-          "name": "setChunkIndex",
-          "parameterTypes": [
-            "java.lang.Integer"
-          ]
-        },
-        {
-          "name": "setChunkText",
-          "parameterTypes": [
-            "java.lang.String"
-          ]
-        },
-        {
-          "name": "setCreatedAt",
-          "parameterTypes": [
-            "java.time.OffsetDateTime"
-          ]
-        },
-        {
-          "name": "setDocumentId",
-          "parameterTypes": [
-            "java.lang.Long"
-          ]
-        },
-        {
-          "name": "setId",
-          "parameterTypes": [
-            "java.lang.Long"
-          ]
-        },
-        {
-          "name": "setIndexGeneration",
-          "parameterTypes": [
-            "java.lang.Long"
-          ]
-        },
-        {
-          "name": "setMetadata",
-          "parameterTypes": [
-            "java.lang.String"
-          ]
-        },
-        {
-          "name": "setTokenCount",
-          "parameterTypes": [
-            "java.lang.Integer"
-          ]
-        },
-        {
-          "name": "setUpdatedAt",
-          "parameterTypes": [
-            "java.time.OffsetDateTime"
-          ]
-        },
-        {
-          "name": "setVectorId",
-          "parameterTypes": [
-            "java.lang.String"
-          ]
-        }
-      ]
-    },
-    {
-      "type": "com.involutionhell.backend.rag.indexing.persistence.mybatis.RagChunkMapper"
-    },
-    {
-      "type": "com.involutionhell.backend.rag.indexing.persistence.mybatis.RagEmbeddingCacheEntity"
-    },
-    {
-      "type": "com.involutionhell.backend.rag.indexing.persistence.mybatis.RagEmbeddingCacheEntity_$$_jvst5_3",
-      "fields": [
-        {
-          "name": "_filter_signature"
-        }
-      ],
-      "methods": [
-        {
-          "name": "<init>",
-          "parameterTypes": []
-        },
-        {
-          "name": "_d10getUpdates",
-          "parameterTypes": []
-        },
-        {
-          "name": "_d29set",
-          "parameterTypes": [
-            "java.lang.String",
-            "java.lang.Object",
-            "boolean"
-          ]
-        },
-        {
-          "name": "_d2finalize",
-          "parameterTypes": []
-        },
-        {
-          "name": "_d49setRaw",
-          "parameterTypes": [
-            "java.lang.String",
-            "java.lang.Object",
-            "boolean"
-          ]
-        }
-      ]
-    },
-    {
-      "type": "com.involutionhell.backend.rag.indexing.persistence.mybatis.RagEmbeddingCacheMapper"
-    },
-    {
-      "type": "com.involutionhell.backend.rag.indexing.persistence.mybatis.RagIndexJobEntity",
-      "methods": [
-        {
-          "name": "<init>",
-          "parameterTypes": []
-        },
-        {
-          "name": "setAttemptCount",
-          "parameterTypes": [
-            "java.lang.Integer"
-          ]
-        },
-        {
-          "name": "setContentSha256",
-          "parameterTypes": [
-            "java.lang.String"
-          ]
-        },
-        {
-          "name": "setCreatedAt",
-          "parameterTypes": [
-            "java.time.OffsetDateTime"
-          ]
-        },
-        {
-          "name": "setDocumentId",
-          "parameterTypes": [
-            "java.lang.Long"
-          ]
-        },
-        {
-          "name": "setFinishedAt",
-          "parameterTypes": [
-            "java.time.OffsetDateTime"
-          ]
-        },
-        {
-          "name": "setId",
-          "parameterTypes": [
-            "java.lang.Long"
-          ]
-        },
-        {
-          "name": "setLastEvent",
-          "parameterTypes": [
-            "java.lang.String"
-          ]
-        },
-        {
-          "name": "setMessageId",
-          "parameterTypes": [
-            "java.lang.String"
-          ]
-        },
-        {
-          "name": "setStage",
-          "parameterTypes": [
-            "java.lang.String"
-          ]
-        },
-        {
-          "name": "setStartedAt",
-          "parameterTypes": [
-            "java.time.OffsetDateTime"
-          ]
-        },
-        {
-          "name": "setStatus",
-          "parameterTypes": [
-            "java.lang.String"
-          ]
-        },
-        {
-          "name": "setTargetGeneration",
-          "parameterTypes": [
-            "java.lang.Long"
-          ]
-        },
-        {
-          "name": "setUpdatedAt",
-          "parameterTypes": [
-            "java.time.OffsetDateTime"
-          ]
-        },
-        {
-          "name": "setVersion",
-          "parameterTypes": [
-            "java.lang.Long"
-          ]
-        }
-      ]
-    },
-    {
-      "type": "com.involutionhell.backend.rag.indexing.persistence.mybatis.RagIndexJobEntity_$$_jvst5_0",
-      "fields": [
-        {
-          "name": "_filter_signature"
-        }
-      ],
-      "methods": [
-        {
-          "name": "<init>",
-          "parameterTypes": []
-        },
-        {
-          "name": "_d18getUpdates",
-          "parameterTypes": []
-        },
-        {
-          "name": "_d2finalize",
-          "parameterTypes": []
-        },
-        {
-          "name": "_d38set",
-          "parameterTypes": [
-            "java.lang.String",
-            "java.lang.Object",
-            "boolean"
-          ]
-        },
-        {
-          "name": "_d62setRaw",
-          "parameterTypes": [
-            "java.lang.String",
-            "java.lang.Object",
-            "boolean"
-          ]
-        }
-      ]
-    },
-    {
-      "type": "com.involutionhell.backend.rag.indexing.persistence.mybatis.RagIndexJobMapper"
-    },
-    {
-      "type": "com.involutionhell.backend.rag.indexing.persistence.mybatis.RagIndexJobTransitionEntity",
-      "methods": [
-        {
-          "name": "<init>",
-          "parameterTypes": []
-        },
-        {
-          "name": "setContentSha256",
-          "parameterTypes": [
-            "java.lang.String"
-          ]
-        },
-        {
-          "name": "setCreatedAt",
-          "parameterTypes": [
-            "java.time.OffsetDateTime"
-          ]
-        },
-        {
-          "name": "setDocumentId",
-          "parameterTypes": [
-            "java.lang.Long"
-          ]
-        },
-        {
-          "name": "setEvent",
-          "parameterTypes": [
-            "java.lang.String"
-          ]
-        },
-        {
-          "name": "setFromState",
-          "parameterTypes": [
-            "java.lang.String"
-          ]
-        },
-        {
-          "name": "setId",
-          "parameterTypes": [
-            "java.lang.Long"
-          ]
-        },
-        {
-          "name": "setJobId",
-          "parameterTypes": [
-            "java.lang.Long"
-          ]
-        },
-        {
-          "name": "setMessageId",
-          "parameterTypes": [
-            "java.lang.String"
-          ]
-        },
-        {
-          "name": "setMetadata",
-          "parameterTypes": [
-            "java.lang.String"
-          ]
-        },
-        {
-          "name": "setOutboxId",
-          "parameterTypes": [
-            "java.lang.Long"
-          ]
-        },
-        {
-          "name": "setSuccess",
-          "parameterTypes": [
-            "java.lang.Boolean"
-          ]
-        },
-        {
-          "name": "setToState",
-          "parameterTypes": [
-            "java.lang.String"
-          ]
-        },
-        {
-          "name": "setTriggerType",
-          "parameterTypes": [
-            "java.lang.String"
-          ]
-        },
-        {
-          "name": "setTriggeredBy",
-          "parameterTypes": [
-            "java.lang.String"
-          ]
-        }
-      ]
-    },
-    {
-      "type": "com.involutionhell.backend.rag.indexing.persistence.mybatis.RagIndexJobTransitionMapper"
-    },
-    {
-      "type": "com.involutionhell.backend.rag.indexing.persistence.mybatis.RagIndexMessageFailureEntity"
-    },
-    {
-      "type": "com.involutionhell.backend.rag.indexing.persistence.mybatis.RagIndexMessageFailureMapper"
-    },
-    {
-      "type": "com.involutionhell.backend.rag.indexing.persistence.mybatis.RagIndexOutboxEntity",
-      "methods": [
-        {
-          "name": "<init>",
-          "parameterTypes": []
-        },
-        {
-          "name": "setAttemptCount",
-          "parameterTypes": [
-            "java.lang.Integer"
-          ]
-        },
-        {
-          "name": "setConsumedAt",
-          "parameterTypes": [
-            "java.time.OffsetDateTime"
-          ]
-        },
-        {
-          "name": "setContentSha256",
-          "parameterTypes": [
-            "java.lang.String"
-          ]
-        },
-        {
-          "name": "setCreatedAt",
-          "parameterTypes": [
-            "java.time.OffsetDateTime"
-          ]
-        },
-        {
-          "name": "setDispatchedAt",
-          "parameterTypes": [
-            "java.time.OffsetDateTime"
-          ]
-        },
-        {
-          "name": "setDocumentId",
-          "parameterTypes": [
-            "java.lang.Long"
-          ]
-        },
-        {
-          "name": "setEventType",
-          "parameterTypes": [
-            "java.lang.String"
-          ]
-        },
-        {
-          "name": "setId",
-          "parameterTypes": [
-            "java.lang.Long"
-          ]
-        },
-        {
-          "name": "setMessageId",
-          "parameterTypes": [
-            "java.lang.String"
-          ]
-        },
-        {
-          "name": "setNextAttemptAt",
-          "parameterTypes": [
-            "java.time.OffsetDateTime"
-          ]
-        },
-        {
-          "name": "setStatus",
-          "parameterTypes": [
-            "java.lang.String"
-          ]
-        },
-        {
-          "name": "setUpdatedAt",
-          "parameterTypes": [
-            "java.time.OffsetDateTime"
-          ]
-        }
-      ]
-    },
-    {
-      "type": "com.involutionhell.backend.rag.indexing.persistence.mybatis.RagIndexOutboxEntity_$$_jvst5_2",
-      "fields": [
-        {
-          "name": "_filter_signature"
-        }
-      ],
-      "methods": [
-        {
-          "name": "<init>",
-          "parameterTypes": []
-        },
-        {
-          "name": "_d17getUpdates",
-          "parameterTypes": []
-        },
-        {
-          "name": "_d2finalize",
-          "parameterTypes": []
-        },
-        {
-          "name": "_d36set",
-          "parameterTypes": [
-            "java.lang.String",
-            "java.lang.Object",
-            "boolean"
-          ]
-        },
-        {
-          "name": "_d62setRaw",
-          "parameterTypes": [
-            "java.lang.String",
-            "java.lang.Object",
-            "boolean"
-          ]
-        }
-      ]
-    },
-    {
-      "type": "com.involutionhell.backend.rag.indexing.persistence.mybatis.RagIndexOutboxMapper"
-    },
-    {
-      "type": "com.involutionhell.backend.rag.indexing.persistence.mybatis.table.RagChunkEntityTableDef"
-    },
-    {
-      "type": "com.involutionhell.backend.rag.indexing.persistence.mybatis.table.RagEmbeddingCacheEntityTableDef"
-    },
-    {
-      "type": "com.involutionhell.backend.rag.indexing.persistence.mybatis.table.RagIndexJobEntityTableDef"
-    },
-    {
-      "type": "com.involutionhell.backend.rag.indexing.persistence.mybatis.table.RagIndexJobTransitionEntityTableDef"
-    },
-    {
-      "type": "com.involutionhell.backend.rag.indexing.persistence.mybatis.table.RagIndexMessageFailureEntityTableDef"
-    },
-    {
-      "type": "com.involutionhell.backend.rag.indexing.persistence.mybatis.table.RagIndexOutboxEntityTableDef"
     },
     {
       "type": "com.involutionhell.backend.rag.indexing.service.RagIndexingFailureClassifier",
@@ -2645,7 +2098,19 @@
           ]
         },
         {
+          "name": "fail",
+          "parameterTypes": [
+            "com.involutionhell.backend.rag.indexing.workflow.IndexWorkflowCommand"
+          ]
+        },
+        {
           "name": "queue",
+          "parameterTypes": [
+            "com.involutionhell.backend.rag.indexing.workflow.IndexWorkflowCommand"
+          ]
+        },
+        {
+          "name": "skip",
           "parameterTypes": [
             "com.involutionhell.backend.rag.indexing.workflow.IndexWorkflowCommand"
           ]
@@ -2686,32 +2151,6 @@
           "parameterTypes": []
         }
       ]
-    },
-    {
-      "type": "com.involutionhell.backend.rag.infrastructure.config.MyBatisNativeConfiguration",
-      "methods": [
-        {
-          "name": "<init>",
-          "parameterTypes": []
-        },
-        {
-          "name": "myBatisFlexBeanFactoryInitializationAotProcessor",
-          "parameterTypes": []
-        },
-        {
-          "name": "myBatisFlexMapperFactoryBeanPostProcessor",
-          "parameterTypes": []
-        }
-      ]
-    },
-    {
-      "type": "com.involutionhell.backend.rag.infrastructure.config.MyBatisNativeConfiguration$MyBatisFlexBeanFactoryInitializationAotProcessor"
-    },
-    {
-      "type": "com.involutionhell.backend.rag.infrastructure.config.MyBatisNativeConfiguration$MyBatisFlexMapperFactoryBeanPostProcessor"
-    },
-    {
-      "type": "com.involutionhell.backend.rag.infrastructure.config.MyBatisNativeConfiguration$MyBatisFlexRuntimeHintsRegistrar"
     },
     {
       "type": "com.involutionhell.backend.rag.infrastructure.config.RagConcurrencyConfiguration",
@@ -2997,6 +2436,13 @@
         {
           "name": "<init>",
           "parameterTypes": []
+        },
+        {
+          "name": "handleUnexpectedException",
+          "parameterTypes": [
+            "java.lang.Exception",
+            "org.springframework.http.server.reactive.ServerHttpRequest"
+          ]
         }
       ]
     },
@@ -3064,109 +2510,109 @@
       "type": "com.involutionhell.backend.rag.retrieval.api.RagContextView"
     },
     {
-      "type": "com.involutionhell.backend.rag.retrieval.api.RagContextView[]"
-    },
-    {
-      "type": "com.involutionhell.backend.rag.retrieval.api.RagContextsView",
+      "type": "com.involutionhell.backend.rag.retrieval.api.RagConversationListView",
       "methods": [
         {
-          "name": "contexts",
+          "name": "conversations",
+          "parameterTypes": []
+        },
+        {
+          "name": "nextCursor",
           "parameterTypes": []
         }
       ]
-    },
-    {
-      "type": "com.involutionhell.backend.rag.retrieval.api.RagConversationListView"
     },
     {
       "type": "com.involutionhell.backend.rag.retrieval.api.RagConversationMessage"
     },
     {
-      "type": "com.involutionhell.backend.rag.retrieval.api.RagConversationMessageView"
-    },
-    {
-      "type": "com.involutionhell.backend.rag.retrieval.api.RagConversationMessagesView"
-    },
-    {
-      "type": "com.involutionhell.backend.rag.retrieval.api.RagConversationSummaryView"
-    },
-    {
-      "type": "com.involutionhell.backend.rag.retrieval.api.RagConversationUpdateRequest"
-    },
-    {
-      "type": "com.involutionhell.backend.rag.retrieval.api.RagQueryExpandedView",
+      "type": "com.involutionhell.backend.rag.retrieval.api.RagConversationMessageView",
       "methods": [
         {
-          "name": "expandedByModel",
+          "name": "content",
           "parameterTypes": []
         },
         {
-          "name": "originalQuestion",
+          "name": "createdAt",
           "parameterTypes": []
         },
         {
-          "name": "queryExpanded",
+          "name": "id",
           "parameterTypes": []
         },
         {
-          "name": "retrievalQueries",
+          "name": "role",
           "parameterTypes": []
         }
       ]
     },
     {
-      "type": "com.involutionhell.backend.rag.retrieval.api.RagQueryTransformedView",
+      "type": "com.involutionhell.backend.rag.retrieval.api.RagConversationMessageView[]"
+    },
+    {
+      "type": "com.involutionhell.backend.rag.retrieval.api.RagConversationMessagesView",
       "methods": [
         {
-          "name": "conversationTurns",
+          "name": "conversationId",
           "parameterTypes": []
         },
         {
-          "name": "originalQuestion",
+          "name": "messages",
           "parameterTypes": []
         },
         {
-          "name": "queryTransformed",
-          "parameterTypes": []
-        },
-        {
-          "name": "retrievalQuestion",
-          "parameterTypes": []
-        },
-        {
-          "name": "rewriteConfidence",
-          "parameterTypes": []
-        },
-        {
-          "name": "rewriteConfidenceReason",
-          "parameterTypes": []
-        },
-        {
-          "name": "rewriteDecision",
-          "parameterTypes": []
-        },
-        {
-          "name": "transformedByModel",
+          "name": "nextCursor",
           "parameterTypes": []
         }
       ]
     },
     {
-      "type": "com.involutionhell.backend.rag.retrieval.api.RagResponseNoticeView",
+      "type": "com.involutionhell.backend.rag.retrieval.api.RagConversationSummaryView",
       "methods": [
         {
-          "name": "code",
+          "name": "conversationId",
           "parameterTypes": []
         },
         {
-          "name": "message",
+          "name": "createdAt",
           "parameterTypes": []
         },
         {
-          "name": "stage",
+          "name": "title",
+          "parameterTypes": []
+        },
+        {
+          "name": "updatedAt",
           "parameterTypes": []
         }
       ]
+    },
+    {
+      "type": "com.involutionhell.backend.rag.retrieval.api.RagConversationSummaryView[]"
+    },
+    {
+      "type": "com.involutionhell.backend.rag.retrieval.api.RagConversationUpdateRequest",
+      "fields": [
+        {
+          "name": "userId"
+        }
+      ],
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": [
+            "java.lang.String",
+            "java.lang.String",
+            "java.lang.String"
+          ]
+        }
+      ]
+    },
+    {
+      "type": "com.involutionhell.backend.rag.retrieval.api.RagResponseNoticeView"
+    },
+    {
+      "type": "com.involutionhell.backend.rag.retrieval.api.RagResponseNoticeView[]"
     },
     {
       "type": "com.involutionhell.backend.rag.retrieval.api.package-info"
@@ -3233,20 +2679,6 @@
           ]
         },
         {
-          "name": "completeAsk",
-          "parameterTypes": [
-            "com.involutionhell.backend.rag.retrieval.application.RagConversationService$AskConversationState",
-            "java.lang.String",
-            "java.lang.String",
-            "java.util.List",
-            "java.util.List",
-            "java.util.List",
-            "boolean",
-            "boolean",
-            "java.lang.String"
-          ]
-        },
-        {
           "name": "findStaleRunningAsks",
           "parameterTypes": [
             "java.time.OffsetDateTime",
@@ -3254,10 +2686,27 @@
           ]
         },
         {
-          "name": "streamAssistantAnswer",
+          "name": "getMessages",
           "parameterTypes": [
-            "com.involutionhell.backend.rag.retrieval.application.RagConversationService$AskConversationState",
+            "java.lang.String",
+            "java.lang.String",
+            "java.lang.Integer",
             "java.lang.String"
+          ]
+        },
+        {
+          "name": "listConversations",
+          "parameterTypes": [
+            "java.lang.String",
+            "java.lang.Integer",
+            "java.lang.String"
+          ]
+        },
+        {
+          "name": "updateConversation",
+          "parameterTypes": [
+            "java.lang.String",
+            "com.involutionhell.backend.rag.retrieval.api.RagConversationUpdateRequest"
           ]
         }
       ]
@@ -3368,29 +2817,14 @@
       "type": "com.involutionhell.backend.rag.retrieval.persistence.RagUserRepository"
     },
     {
-      "type": "com.involutionhell.backend.rag.retrieval.persistence.mybatis.MyBatisFlexRagAskRunRepository",
+      "type": "com.involutionhell.backend.rag.retrieval.persistence.jdbc.JdbcRagAskRunRepository",
       "methods": [
         {
           "name": "<init>",
           "parameterTypes": [
-            "com.involutionhell.backend.rag.retrieval.persistence.mybatis.RagAskRunMapper",
+            "org.springframework.jdbc.core.simple.JdbcClient",
             "com.involutionhell.backend.rag.shared.support.RagJsonCodec",
             "com.involutionhell.backend.rag.shared.persistence.RagDatabaseDialect"
-          ]
-        },
-        {
-          "name": "createRunning",
-          "parameterTypes": [
-            "java.lang.String",
-            "java.lang.String",
-            "java.lang.String",
-            "java.lang.Long",
-            "java.lang.Long",
-            "java.lang.Long",
-            "java.lang.String",
-            "java.lang.String",
-            "java.lang.Integer",
-            "java.util.Map"
           ]
         },
         {
@@ -3407,24 +2841,11 @@
             "java.time.OffsetDateTime",
             "int"
           ]
-        },
-        {
-          "name": "markSucceeded",
-          "parameterTypes": [
-            "java.lang.String",
-            "java.lang.Long",
-            "java.lang.String",
-            "java.util.List",
-            "java.lang.Object",
-            "java.lang.Object",
-            "boolean",
-            "boolean"
-          ]
         }
       ]
     },
     {
-      "type": "com.involutionhell.backend.rag.retrieval.persistence.mybatis.MyBatisFlexRagAskRunRepository$$SpringCGLIB$$0",
+      "type": "com.involutionhell.backend.rag.retrieval.persistence.jdbc.JdbcRagAskRunRepository$$SpringCGLIB$$0",
       "fields": [
         {
           "name": "CGLIB$CALLBACK_FILTER"
@@ -3435,43 +2856,32 @@
       ]
     },
     {
-      "type": "com.involutionhell.backend.rag.retrieval.persistence.mybatis.MyBatisFlexRagConversationMessageRepository",
+      "type": "com.involutionhell.backend.rag.retrieval.persistence.jdbc.JdbcRagConversationMessageRepository",
       "methods": [
         {
           "name": "<init>",
           "parameterTypes": [
-            "com.involutionhell.backend.rag.retrieval.persistence.mybatis.RagConversationMessageMapper"
+            "org.springframework.jdbc.core.simple.JdbcClient"
           ]
         },
         {
-          "name": "append",
+          "name": "findByConversationId",
           "parameterTypes": [
             "java.lang.Long",
-            "java.lang.String",
-            "java.lang.String",
-            "java.lang.String",
-            "java.lang.String"
+            "int",
+            "com.involutionhell.backend.rag.retrieval.persistence.RagConversationMessageCursor"
           ]
         },
         {
-          "name": "findRecentByConversationId",
+          "name": "findById",
           "parameterTypes": [
-            "java.lang.Long",
-            "int"
-          ]
-        },
-        {
-          "name": "updateContentAndStatus",
-          "parameterTypes": [
-            "java.lang.Long",
-            "java.lang.String",
-            "java.lang.String"
+            "java.lang.Long"
           ]
         }
       ]
     },
     {
-      "type": "com.involutionhell.backend.rag.retrieval.persistence.mybatis.MyBatisFlexRagConversationMessageRepository$$SpringCGLIB$$0",
+      "type": "com.involutionhell.backend.rag.retrieval.persistence.jdbc.JdbcRagConversationMessageRepository$$SpringCGLIB$$0",
       "fields": [
         {
           "name": "CGLIB$CALLBACK_FILTER"
@@ -3482,20 +2892,26 @@
       ]
     },
     {
-      "type": "com.involutionhell.backend.rag.retrieval.persistence.mybatis.MyBatisFlexRagConversationRepository",
+      "type": "com.involutionhell.backend.rag.retrieval.persistence.jdbc.JdbcRagConversationRepository",
       "methods": [
         {
           "name": "<init>",
           "parameterTypes": [
-            "com.involutionhell.backend.rag.retrieval.persistence.mybatis.RagConversationMapper"
+            "org.springframework.jdbc.core.simple.JdbcClient"
           ]
         },
         {
-          "name": "create",
+          "name": "findByConversationId",
+          "parameterTypes": [
+            "java.lang.String"
+          ]
+        },
+        {
+          "name": "findByUserId",
           "parameterTypes": [
             "java.lang.String",
-            "java.lang.String",
-            "java.lang.String"
+            "int",
+            "com.involutionhell.backend.rag.retrieval.persistence.RagConversationCursor"
           ]
         },
         {
@@ -3505,15 +2921,18 @@
           ]
         },
         {
-          "name": "refreshStats",
+          "name": "update",
           "parameterTypes": [
-            "java.lang.Long"
+            "java.lang.String",
+            "java.lang.String",
+            "java.lang.String",
+            "java.lang.String"
           ]
         }
       ]
     },
     {
-      "type": "com.involutionhell.backend.rag.retrieval.persistence.mybatis.MyBatisFlexRagConversationRepository$$SpringCGLIB$$0",
+      "type": "com.involutionhell.backend.rag.retrieval.persistence.jdbc.JdbcRagConversationRepository$$SpringCGLIB$$0",
       "fields": [
         {
           "name": "CGLIB$CALLBACK_FILTER"
@@ -3524,12 +2943,12 @@
       ]
     },
     {
-      "type": "com.involutionhell.backend.rag.retrieval.persistence.mybatis.MyBatisFlexRagUserRepository",
+      "type": "com.involutionhell.backend.rag.retrieval.persistence.jdbc.JdbcRagUserRepository",
       "methods": [
         {
           "name": "<init>",
           "parameterTypes": [
-            "com.involutionhell.backend.rag.retrieval.persistence.mybatis.RagUserMapper",
+            "org.springframework.jdbc.core.simple.JdbcClient",
             "com.involutionhell.backend.rag.shared.persistence.RagNestedTransactionExecutor"
           ]
         },
@@ -3542,7 +2961,7 @@
       ]
     },
     {
-      "type": "com.involutionhell.backend.rag.retrieval.persistence.mybatis.MyBatisFlexRagUserRepository$$SpringCGLIB$$0",
+      "type": "com.involutionhell.backend.rag.retrieval.persistence.jdbc.JdbcRagUserRepository$$SpringCGLIB$$0",
       "fields": [
         {
           "name": "CGLIB$CALLBACK_FILTER"
@@ -3551,317 +2970,6 @@
           "name": "CGLIB$FACTORY_DATA"
         }
       ]
-    },
-    {
-      "type": "com.involutionhell.backend.rag.retrieval.persistence.mybatis.RagAskRunEntity"
-    },
-    {
-      "type": "com.involutionhell.backend.rag.retrieval.persistence.mybatis.RagAskRunEntity_$$_jvst5_7",
-      "fields": [
-        {
-          "name": "_filter_signature"
-        }
-      ],
-      "methods": [
-        {
-          "name": "<init>",
-          "parameterTypes": []
-        },
-        {
-          "name": "_d24getUpdates",
-          "parameterTypes": []
-        },
-        {
-          "name": "_d45set",
-          "parameterTypes": [
-            "java.lang.String",
-            "java.lang.Object",
-            "boolean"
-          ]
-        },
-        {
-          "name": "_d72setRaw",
-          "parameterTypes": [
-            "java.lang.String",
-            "java.lang.Object",
-            "boolean"
-          ]
-        }
-      ]
-    },
-    {
-      "type": "com.involutionhell.backend.rag.retrieval.persistence.mybatis.RagAskRunMapper"
-    },
-    {
-      "type": "com.involutionhell.backend.rag.retrieval.persistence.mybatis.RagConversationEntity",
-      "methods": [
-        {
-          "name": "<init>",
-          "parameterTypes": []
-        },
-        {
-          "name": "setConversationId",
-          "parameterTypes": [
-            "java.lang.String"
-          ]
-        },
-        {
-          "name": "setCreatedAt",
-          "parameterTypes": [
-            "java.time.OffsetDateTime"
-          ]
-        },
-        {
-          "name": "setId",
-          "parameterTypes": [
-            "java.lang.Long"
-          ]
-        },
-        {
-          "name": "setMessageCount",
-          "parameterTypes": [
-            "java.lang.Integer"
-          ]
-        },
-        {
-          "name": "setMetadata",
-          "parameterTypes": [
-            "java.lang.String"
-          ]
-        },
-        {
-          "name": "setStatus",
-          "parameterTypes": [
-            "java.lang.String"
-          ]
-        },
-        {
-          "name": "setTitle",
-          "parameterTypes": [
-            "java.lang.String"
-          ]
-        },
-        {
-          "name": "setUpdatedAt",
-          "parameterTypes": [
-            "java.time.OffsetDateTime"
-          ]
-        },
-        {
-          "name": "setUserId",
-          "parameterTypes": [
-            "java.lang.String"
-          ]
-        }
-      ]
-    },
-    {
-      "type": "com.involutionhell.backend.rag.retrieval.persistence.mybatis.RagConversationEntity_$$_jvst5_5",
-      "fields": [
-        {
-          "name": "_filter_signature"
-        }
-      ],
-      "methods": [
-        {
-          "name": "<init>",
-          "parameterTypes": []
-        },
-        {
-          "name": "_d13getUpdates",
-          "parameterTypes": []
-        },
-        {
-          "name": "_d2finalize",
-          "parameterTypes": []
-        },
-        {
-          "name": "_d54setRaw",
-          "parameterTypes": [
-            "java.lang.String",
-            "java.lang.Object",
-            "boolean"
-          ]
-        }
-      ]
-    },
-    {
-      "type": "com.involutionhell.backend.rag.retrieval.persistence.mybatis.RagConversationMapper"
-    },
-    {
-      "type": "com.involutionhell.backend.rag.retrieval.persistence.mybatis.RagConversationMessageEntity",
-      "methods": [
-        {
-          "name": "<init>",
-          "parameterTypes": []
-        },
-        {
-          "name": "setContent",
-          "parameterTypes": [
-            "java.lang.String"
-          ]
-        },
-        {
-          "name": "setConversationId",
-          "parameterTypes": [
-            "java.lang.Long"
-          ]
-        },
-        {
-          "name": "setCorrelationId",
-          "parameterTypes": [
-            "java.lang.String"
-          ]
-        },
-        {
-          "name": "setCreatedAt",
-          "parameterTypes": [
-            "java.time.OffsetDateTime"
-          ]
-        },
-        {
-          "name": "setId",
-          "parameterTypes": [
-            "java.lang.Long"
-          ]
-        },
-        {
-          "name": "setMessageId",
-          "parameterTypes": [
-            "java.lang.String"
-          ]
-        },
-        {
-          "name": "setMetadata",
-          "parameterTypes": [
-            "java.lang.String"
-          ]
-        },
-        {
-          "name": "setRole",
-          "parameterTypes": [
-            "java.lang.String"
-          ]
-        },
-        {
-          "name": "setSequenceNo",
-          "parameterTypes": [
-            "java.lang.Integer"
-          ]
-        },
-        {
-          "name": "setStatus",
-          "parameterTypes": [
-            "java.lang.String"
-          ]
-        }
-      ]
-    },
-    {
-      "type": "com.involutionhell.backend.rag.retrieval.persistence.mybatis.RagConversationMessageEntity_$$_jvst5_6",
-      "fields": [
-        {
-          "name": "_filter_signature"
-        }
-      ],
-      "methods": [
-        {
-          "name": "<init>",
-          "parameterTypes": []
-        },
-        {
-          "name": "_d15getUpdates",
-          "parameterTypes": []
-        },
-        {
-          "name": "_d34set",
-          "parameterTypes": [
-            "java.lang.String",
-            "java.lang.Object",
-            "boolean"
-          ]
-        }
-      ]
-    },
-    {
-      "type": "com.involutionhell.backend.rag.retrieval.persistence.mybatis.RagConversationMessageMapper"
-    },
-    {
-      "type": "com.involutionhell.backend.rag.retrieval.persistence.mybatis.RagUserEntity"
-    },
-    {
-      "type": "com.involutionhell.backend.rag.retrieval.persistence.mybatis.RagUserEntity_$$_jvst5_4",
-      "fields": [
-        {
-          "name": "_filter_signature"
-        }
-      ],
-      "methods": [
-        {
-          "name": "<init>",
-          "parameterTypes": []
-        },
-        {
-          "name": "_d2finalize",
-          "parameterTypes": []
-        },
-        {
-          "name": "_d47setRaw",
-          "parameterTypes": [
-            "java.lang.String",
-            "java.lang.Object",
-            "boolean"
-          ]
-        },
-        {
-          "name": "_d8getUpdates",
-          "parameterTypes": []
-        }
-      ]
-    },
-    {
-      "type": "com.involutionhell.backend.rag.retrieval.persistence.mybatis.RagUserMapper"
-    },
-    {
-      "type": "com.involutionhell.backend.rag.retrieval.persistence.mybatis.RetrievalMyBatisFlexConfiguration"
-    },
-    {
-      "type": "com.involutionhell.backend.rag.retrieval.persistence.mybatis.RetrievalMyBatisFlexConfiguration$$SpringCGLIB$$0",
-      "fields": [
-        {
-          "name": "$$beanFactory"
-        },
-        {
-          "name": "CGLIB$CALLBACK_FILTER"
-        },
-        {
-          "name": "CGLIB$FACTORY_DATA"
-        }
-      ],
-      "methods": [
-        {
-          "name": "<init>",
-          "parameterTypes": []
-        },
-        {
-          "name": "CGLIB$SET_STATIC_CALLBACKS",
-          "parameterTypes": [
-            "org.springframework.cglib.proxy.Callback[]"
-          ]
-        }
-      ]
-    },
-    {
-      "type": "com.involutionhell.backend.rag.retrieval.persistence.mybatis.table.RagAskRunEntityTableDef"
-    },
-    {
-      "type": "com.involutionhell.backend.rag.retrieval.persistence.mybatis.table.RagConversationEntityTableDef"
-    },
-    {
-      "type": "com.involutionhell.backend.rag.retrieval.persistence.mybatis.table.RagConversationMessageEntityTableDef"
-    },
-    {
-      "type": "com.involutionhell.backend.rag.retrieval.persistence.mybatis.table.RagUserEntityTableDef"
     },
     {
       "type": "com.involutionhell.backend.rag.retrieval.service.DefaultRagRetrievalBudgetPlanner",
@@ -4103,6 +3211,30 @@
           "parameterTypes": [
             "com.involutionhell.backend.rag.retrieval.application.RagConversationService"
           ]
+        },
+        {
+          "name": "getMessages",
+          "parameterTypes": [
+            "java.lang.String",
+            "java.lang.String",
+            "java.lang.Integer",
+            "java.lang.String"
+          ]
+        },
+        {
+          "name": "listConversations",
+          "parameterTypes": [
+            "java.lang.String",
+            "java.lang.Integer",
+            "java.lang.String"
+          ]
+        },
+        {
+          "name": "updateConversation",
+          "parameterTypes": [
+            "java.lang.String",
+            "com.involutionhell.backend.rag.retrieval.api.RagConversationUpdateRequest"
+          ]
         }
       ]
     },
@@ -4161,21 +3293,13 @@
       "type": "com.involutionhell.backend.rag.shared.package-info"
     },
     {
-      "type": "com.involutionhell.backend.rag.shared.persistence.JsonStringTypeHandler",
-      "methods": [
-        {
-          "name": "<init>",
-          "parameterTypes": []
-        }
-      ]
-    },
-    {
       "type": "com.involutionhell.backend.rag.shared.persistence.RagDatabaseDialect",
       "methods": [
         {
           "name": "<init>",
           "parameterTypes": [
-            "javax.sql.DataSource"
+            "javax.sql.DataSource",
+            "org.springframework.jdbc.core.simple.JdbcClient"
           ]
         }
       ]
@@ -4428,259 +3552,6 @@
       "type": "com.knuddels.jtokkit.api.EncodingRegistry"
     },
     {
-      "type": "com.mybatisflex.annotation.Table"
-    },
-    {
-      "type": "com.mybatisflex.core.BaseMapper",
-      "methods": [
-        {
-          "name": "selectOneByQuery",
-          "parameterTypes": [
-            "com.mybatisflex.core.query.QueryWrapper"
-          ]
-        },
-        {
-          "name": "updateByQuery",
-          "parameterTypes": [
-            "java.lang.Object",
-            "com.mybatisflex.core.query.QueryWrapper"
-          ]
-        }
-      ]
-    },
-    {
-      "type": "com.mybatisflex.core.paginate.Page"
-    },
-    {
-      "type": "com.mybatisflex.core.provider.EntitySqlProvider",
-      "methods": [
-        {
-          "name": "selectListByQuery",
-          "parameterTypes": [
-            "java.util.Map",
-            "org.apache.ibatis.builder.annotation.ProviderContext"
-          ]
-        },
-        {
-          "name": "updateByQuery",
-          "parameterTypes": [
-            "java.util.Map",
-            "org.apache.ibatis.builder.annotation.ProviderContext"
-          ]
-        }
-      ]
-    },
-    {
-      "type": "com.mybatisflex.core.provider.RowSqlProvider",
-      "methods": [
-        {
-          "name": "deleteByQuery",
-          "parameterTypes": [
-            "java.util.Map"
-          ]
-        },
-        {
-          "name": "insert",
-          "parameterTypes": [
-            "java.util.Map"
-          ]
-        },
-        {
-          "name": "selectListByQuery",
-          "parameterTypes": [
-            "java.util.Map"
-          ]
-        }
-      ]
-    },
-    {
-      "type": "com.mybatisflex.core.query.QueryColumn"
-    },
-    {
-      "type": "com.mybatisflex.core.query.QueryCondition"
-    },
-    {
-      "type": "com.mybatisflex.core.query.QueryWrapper"
-    },
-    {
-      "type": "com.mybatisflex.core.query.RawQueryColumn"
-    },
-    {
-      "type": "com.mybatisflex.core.row.BatchArgsSetter"
-    },
-    {
-      "type": "com.mybatisflex.core.row.Db"
-    },
-    {
-      "type": "com.mybatisflex.core.row.DbChain"
-    },
-    {
-      "type": "com.mybatisflex.core.row.Row"
-    },
-    {
-      "type": "com.mybatisflex.core.row.RowCPI"
-    },
-    {
-      "type": "com.mybatisflex.core.row.RowKey"
-    },
-    {
-      "type": "com.mybatisflex.core.row.RowMapper",
-      "methods": [
-        {
-          "name": "selectCountByQuery",
-          "parameterTypes": [
-            "java.lang.String",
-            "java.lang.String",
-            "com.mybatisflex.core.query.QueryWrapper"
-          ]
-        },
-        {
-          "name": "selectObjectByQuery",
-          "parameterTypes": [
-            "java.lang.String",
-            "java.lang.String",
-            "com.mybatisflex.core.query.QueryWrapper"
-          ]
-        }
-      ]
-    },
-    {
-      "type": "com.mybatisflex.core.row.RowMapperInvoker"
-    },
-    {
-      "type": "com.mybatisflex.core.row.RowUtil"
-    },
-    {
-      "type": "com.mybatisflex.core.update.PropertySetter"
-    },
-    {
-      "type": "com.mybatisflex.core.update.UpdateChain"
-    },
-    {
-      "type": "com.mybatisflex.core.update.UpdateWrapper"
-    },
-    {
-      "type": "com.mybatisflex.spring.boot.ConditionalOnMybatisFlexDatasource"
-    },
-    {
-      "type": "com.mybatisflex.spring.boot.ConditionalOnMybatisFlexDatasource$OnMybatisFlexDataSourceCondition",
-      "methods": [
-        {
-          "name": "<init>",
-          "parameterTypes": []
-        }
-      ]
-    },
-    {
-      "type": "com.mybatisflex.spring.boot.MyBatisFlexCustomizer"
-    },
-    {
-      "type": "com.mybatisflex.spring.boot.MybatisLanguageDriverAutoConfiguration",
-      "methods": [
-        {
-          "name": "<init>",
-          "parameterTypes": []
-        }
-      ]
-    },
-    {
-      "type": "com.mybatisflex.spring.boot.SpringBootVFS",
-      "methods": [
-        {
-          "name": "<init>",
-          "parameterTypes": []
-        }
-      ]
-    },
-    {
-      "type": "com.mybatisflex.spring.boot.v4.MybatisFlexAutoConfiguration",
-      "methods": [
-        {
-          "name": "<init>",
-          "parameterTypes": [
-            "com.mybatisflex.spring.boot.v4.MybatisFlexProperties",
-            "org.springframework.beans.factory.ObjectProvider",
-            "org.springframework.beans.factory.ObjectProvider",
-            "org.springframework.beans.factory.ObjectProvider",
-            "org.springframework.core.io.ResourceLoader",
-            "org.springframework.beans.factory.ObjectProvider",
-            "org.springframework.beans.factory.ObjectProvider",
-            "org.springframework.beans.factory.ObjectProvider",
-            "org.springframework.beans.factory.ObjectProvider",
-            "org.springframework.beans.factory.ObjectProvider",
-            "org.springframework.beans.factory.ObjectProvider",
-            "org.springframework.beans.factory.ObjectProvider",
-            "org.springframework.beans.factory.ObjectProvider",
-            "org.springframework.beans.factory.ObjectProvider"
-          ]
-        },
-        {
-          "name": "sqlSessionFactory",
-          "parameterTypes": [
-            "javax.sql.DataSource"
-          ]
-        },
-        {
-          "name": "sqlSessionTemplate",
-          "parameterTypes": [
-            "org.apache.ibatis.session.SqlSessionFactory"
-          ]
-        }
-      ]
-    },
-    {
-      "type": "com.mybatisflex.spring.boot.v4.MybatisFlexAutoConfiguration$AutoConfiguredMapperScannerRegistrar",
-      "methods": [
-        {
-          "name": "<init>",
-          "parameterTypes": []
-        }
-      ]
-    },
-    {
-      "type": "com.mybatisflex.spring.boot.v4.MybatisFlexProperties",
-      "methods": [
-        {
-          "name": "<init>",
-          "parameterTypes": []
-        },
-        {
-          "name": "getConfiguration",
-          "parameterTypes": []
-        },
-        {
-          "name": "setConfiguration",
-          "parameterTypes": [
-            "com.mybatisflex.spring.boot.v4.MybatisFlexProperties$CoreConfiguration"
-          ]
-        }
-      ]
-    },
-    {
-      "type": "com.mybatisflex.spring.boot.v4.MybatisFlexProperties$AdminConfig"
-    },
-    {
-      "type": "com.mybatisflex.spring.boot.v4.MybatisFlexProperties$CoreConfiguration",
-      "methods": [
-        {
-          "name": "<init>",
-          "parameterTypes": []
-        },
-        {
-          "name": "setLogImpl",
-          "parameterTypes": [
-            "java.lang.Class"
-          ]
-        }
-      ]
-    },
-    {
-      "type": "com.mybatisflex.spring.boot.v4.MybatisFlexProperties$GlobalConfig"
-    },
-    {
-      "type": "com.mybatisflex.spring.boot.v4.MybatisFlexProperties$SeataConfig"
-    },
-    {
       "type": "com.openai.azure.AzureOpenAIServiceVersion"
     },
     {
@@ -4690,72 +3561,7 @@
       "type": "com.openai.client.OpenAIClientAsync"
     },
     {
-      "type": "com.openai.core.Enum"
-    },
-    {
-      "type": "com.openai.core.JsonField"
-    },
-    {
-      "type": "com.openai.core.JsonField$Deserializer",
-      "methods": [
-        {
-          "name": "<init>",
-          "parameterTypes": []
-        }
-      ]
-    },
-    {
-      "type": "com.openai.core.JsonField$IsMissing",
-      "methods": [
-        {
-          "name": "<init>",
-          "parameterTypes": []
-        }
-      ]
-    },
-    {
-      "type": "com.openai.core.JsonField$Visitor"
-    },
-    {
-      "type": "com.openai.core.JsonMissing$Serializer",
-      "methods": [
-        {
-          "name": "<init>",
-          "parameterTypes": []
-        }
-      ]
-    },
-    {
       "type": "com.openai.core.JsonValue"
-    },
-    {
-      "type": "com.openai.core.JsonValue$Deserializer",
-      "methods": [
-        {
-          "name": "<init>",
-          "parameterTypes": []
-        }
-      ]
-    },
-    {
-      "type": "com.openai.core.KnownValue",
-      "fields": [
-        {
-          "name": "value"
-        }
-      ]
-    },
-    {
-      "type": "com.openai.core.KnownValue$Companion"
-    },
-    {
-      "type": "com.openai.core.Params"
-    },
-    {
-      "type": "com.openai.core.http.Headers"
-    },
-    {
-      "type": "com.openai.core.http.QueryParams"
     },
     {
       "type": "com.openai.credential.Credential"
@@ -4815,178 +3621,13 @@
       "type": "com.openai.models.completions.CompletionUsage$PromptTokensDetails"
     },
     {
-      "type": "com.openai.models.embeddings.CreateEmbeddingResponse",
-      "methods": [
-        {
-          "name": "<init>",
-          "parameterTypes": [
-            "com.openai.core.JsonField",
-            "com.openai.core.JsonField",
-            "com.openai.core.JsonValue",
-            "com.openai.core.JsonField"
-          ]
-        },
-        {
-          "name": "putAdditionalProperty",
-          "parameterTypes": [
-            "java.lang.String",
-            "com.openai.core.JsonValue"
-          ]
-        }
-      ]
+      "type": "com.openai.models.embeddings.CreateEmbeddingResponse"
     },
     {
-      "type": "com.openai.models.embeddings.CreateEmbeddingResponse$Builder"
+      "type": "com.openai.models.embeddings.CreateEmbeddingResponse$Usage"
     },
     {
-      "type": "com.openai.models.embeddings.CreateEmbeddingResponse$Companion"
-    },
-    {
-      "type": "com.openai.models.embeddings.CreateEmbeddingResponse$Usage",
-      "methods": [
-        {
-          "name": "<init>",
-          "parameterTypes": [
-            "com.openai.core.JsonField",
-            "com.openai.core.JsonField"
-          ]
-        }
-      ]
-    },
-    {
-      "type": "com.openai.models.embeddings.CreateEmbeddingResponse$Usage$Builder"
-    },
-    {
-      "type": "com.openai.models.embeddings.CreateEmbeddingResponse$Usage$Companion"
-    },
-    {
-      "type": "com.openai.models.embeddings.Embedding",
-      "methods": [
-        {
-          "name": "<init>",
-          "parameterTypes": [
-            "com.openai.core.JsonField",
-            "com.openai.core.JsonField",
-            "com.openai.core.JsonValue"
-          ]
-        }
-      ]
-    },
-    {
-      "type": "com.openai.models.embeddings.Embedding$Builder"
-    },
-    {
-      "type": "com.openai.models.embeddings.Embedding$Companion"
-    },
-    {
-      "type": "com.openai.models.embeddings.EmbeddingCreateParams",
-      "methods": [
-        {
-          "name": "model",
-          "parameterTypes": []
-        }
-      ]
-    },
-    {
-      "type": "com.openai.models.embeddings.EmbeddingCreateParams$Body",
-      "methods": [
-        {
-          "name": "_additionalProperties",
-          "parameterTypes": []
-        },
-        {
-          "name": "_dimensions",
-          "parameterTypes": []
-        },
-        {
-          "name": "_encodingFormat",
-          "parameterTypes": []
-        },
-        {
-          "name": "_input",
-          "parameterTypes": []
-        },
-        {
-          "name": "_model",
-          "parameterTypes": []
-        },
-        {
-          "name": "_user",
-          "parameterTypes": []
-        }
-      ]
-    },
-    {
-      "type": "com.openai.models.embeddings.EmbeddingCreateParams$Body$Builder"
-    },
-    {
-      "type": "com.openai.models.embeddings.EmbeddingCreateParams$Body$Companion"
-    },
-    {
-      "type": "com.openai.models.embeddings.EmbeddingCreateParams$Builder"
-    },
-    {
-      "type": "com.openai.models.embeddings.EmbeddingCreateParams$Companion"
-    },
-    {
-      "type": "com.openai.models.embeddings.EmbeddingCreateParams$EncodingFormat",
-      "methods": [
-        {
-          "name": "_value",
-          "parameterTypes": []
-        }
-      ]
-    },
-    {
-      "type": "com.openai.models.embeddings.EmbeddingCreateParams$EncodingFormat$Companion"
-    },
-    {
-      "type": "com.openai.models.embeddings.EmbeddingCreateParams$EncodingFormat$Known"
-    },
-    {
-      "type": "com.openai.models.embeddings.EmbeddingCreateParams$EncodingFormat$Value"
-    },
-    {
-      "type": "com.openai.models.embeddings.EmbeddingCreateParams$Input"
-    },
-    {
-      "type": "com.openai.models.embeddings.EmbeddingCreateParams$Input$Serializer",
-      "methods": [
-        {
-          "name": "<init>",
-          "parameterTypes": []
-        }
-      ]
-    },
-    {
-      "type": "com.openai.models.embeddings.EmbeddingModel",
-      "methods": [
-        {
-          "name": "_value",
-          "parameterTypes": []
-        }
-      ]
-    },
-    {
-      "type": "com.openai.models.embeddings.EmbeddingModel$Companion"
-    },
-    {
-      "type": "com.openai.models.embeddings.EmbeddingModel$Known"
-    },
-    {
-      "type": "com.openai.models.embeddings.EmbeddingModel$Value"
-    },
-    {
-      "type": "com.openai.models.embeddings.EmbeddingValue"
-    },
-    {
-      "type": "com.openai.models.embeddings.EmbeddingValue$Deserializer",
-      "methods": [
-        {
-          "name": "<init>",
-          "parameterTypes": []
-        }
-      ]
+      "type": "com.openai.models.embeddings.EmbeddingCreateParams"
     },
     {
       "type": "com.openai.models.images.Image"
@@ -5057,17 +3698,6 @@
         {
           "name": "<init>",
           "parameterTypes": []
-        }
-      ]
-    },
-    {
-      "type": "com.sun.crypto.provider.HKDFKeyDerivation$HKDFSHA256",
-      "methods": [
-        {
-          "name": "<init>",
-          "parameterTypes": [
-            "javax.crypto.KDFParameters"
-          ]
         }
       ]
     },
@@ -5260,13 +3890,7 @@
       ]
     },
     {
-      "type": "com.zaxxer.hikari.HikariConfig",
-      "methods": [
-        {
-          "name": "getJdbcUrl",
-          "parameterTypes": []
-        }
-      ]
+      "type": "com.zaxxer.hikari.HikariConfig"
     },
     {
       "type": "com.zaxxer.hikari.HikariConfigMXBean"
@@ -6867,6 +5491,9 @@
       "type": "jakarta.mail.NoSuchProviderException"
     },
     {
+      "type": "jakarta.mail.Provider"
+    },
+    {
       "type": "jakarta.mail.Session"
     },
     {
@@ -7004,10 +5631,46 @@
       ]
     },
     {
-      "type": "jakarta.validation.constraints.NotEmpty"
+      "type": "jakarta.validation.constraints.NotEmpty",
+      "methods": [
+        {
+          "name": "groups",
+          "parameterTypes": []
+        },
+        {
+          "name": "message",
+          "parameterTypes": []
+        },
+        {
+          "name": "payload",
+          "parameterTypes": []
+        }
+      ]
     },
     {
-      "type": "jakarta.validation.constraints.Pattern"
+      "type": "jakarta.validation.constraints.Pattern",
+      "methods": [
+        {
+          "name": "flags",
+          "parameterTypes": []
+        },
+        {
+          "name": "groups",
+          "parameterTypes": []
+        },
+        {
+          "name": "message",
+          "parameterTypes": []
+        },
+        {
+          "name": "payload",
+          "parameterTypes": []
+        },
+        {
+          "name": "regexp",
+          "parameterTypes": []
+        }
+      ]
     },
     {
       "type": "jakarta.validation.constraints.Positive",
@@ -7062,6 +5725,9 @@
     },
     {
       "type": "jakarta.xml.bind.Binder"
+    },
+    {
+      "type": "java.beans.Introspector"
     },
     {
       "type": "java.io.Closeable"
@@ -7168,14 +5834,6 @@
         {
           "name": "getModule",
           "parameterTypes": []
-        },
-        {
-          "name": "isRecord",
-          "parameterTypes": []
-        },
-        {
-          "name": "isSealed",
-          "parameterTypes": []
         }
       ]
     },
@@ -7198,6 +5856,9 @@
     },
     {
       "type": "java.lang.CloneNotSupportedException"
+    },
+    {
+      "type": "java.lang.Cloneable"
     },
     {
       "type": "java.lang.Comparable"
@@ -7320,9 +5981,6 @@
     },
     {
       "type": "java.lang.RuntimeException"
-    },
-    {
-      "type": "java.lang.SafeVarargs"
     },
     {
       "type": "java.lang.SecurityManager",
@@ -7469,9 +6127,6 @@
       ]
     },
     {
-      "type": "java.lang.invoke.CallSite"
-    },
-    {
       "type": "java.lang.invoke.MethodHandles",
       "methods": [
         {
@@ -7614,15 +6269,6 @@
       "type": "java.lang.reflect.Type"
     },
     {
-      "type": "java.lang.reflect.TypeVariable",
-      "methods": [
-        {
-          "name": "getBounds",
-          "parameterTypes": []
-        }
-      ]
-    },
-    {
       "type": "java.lang.reflect.UndeclaredThrowableException"
     },
     {
@@ -7736,6 +6382,12 @@
       "type": "java.security.KeyStoreSpi"
     },
     {
+      "type": "java.security.interfaces.ECPrivateKey"
+    },
+    {
+      "type": "java.security.interfaces.ECPublicKey"
+    },
+    {
       "type": "java.security.interfaces.RSAPrivateKey"
     },
     {
@@ -7745,7 +6397,19 @@
       "type": "java.sql.CallableStatement"
     },
     {
-      "type": "java.sql.Connection"
+      "type": "java.sql.Connection",
+      "methods": [
+        {
+          "name": "getMetaData",
+          "parameterTypes": []
+        },
+        {
+          "name": "isValid",
+          "parameterTypes": [
+            "int"
+          ]
+        }
+      ]
     },
     {
       "type": "java.sql.ConnectionBuilder"
@@ -7776,6 +6440,131 @@
     },
     {
       "type": "java.sql.Statement[]"
+    },
+    {
+      "type": "java.sql.Timestamp"
+    },
+    {
+      "type": "java.sql.Types",
+      "fields": [
+        {
+          "name": "ARRAY"
+        },
+        {
+          "name": "BIGINT"
+        },
+        {
+          "name": "BINARY"
+        },
+        {
+          "name": "BIT"
+        },
+        {
+          "name": "BLOB"
+        },
+        {
+          "name": "BOOLEAN"
+        },
+        {
+          "name": "CHAR"
+        },
+        {
+          "name": "CLOB"
+        },
+        {
+          "name": "DATALINK"
+        },
+        {
+          "name": "DATE"
+        },
+        {
+          "name": "DECIMAL"
+        },
+        {
+          "name": "DISTINCT"
+        },
+        {
+          "name": "DOUBLE"
+        },
+        {
+          "name": "FLOAT"
+        },
+        {
+          "name": "INTEGER"
+        },
+        {
+          "name": "JAVA_OBJECT"
+        },
+        {
+          "name": "LONGNVARCHAR"
+        },
+        {
+          "name": "LONGVARBINARY"
+        },
+        {
+          "name": "LONGVARCHAR"
+        },
+        {
+          "name": "NCHAR"
+        },
+        {
+          "name": "NCLOB"
+        },
+        {
+          "name": "NULL"
+        },
+        {
+          "name": "NUMERIC"
+        },
+        {
+          "name": "NVARCHAR"
+        },
+        {
+          "name": "OTHER"
+        },
+        {
+          "name": "REAL"
+        },
+        {
+          "name": "REF"
+        },
+        {
+          "name": "REF_CURSOR"
+        },
+        {
+          "name": "ROWID"
+        },
+        {
+          "name": "SMALLINT"
+        },
+        {
+          "name": "SQLXML"
+        },
+        {
+          "name": "STRUCT"
+        },
+        {
+          "name": "TIME"
+        },
+        {
+          "name": "TIMESTAMP"
+        },
+        {
+          "name": "TIMESTAMP_WITH_TIMEZONE"
+        },
+        {
+          "name": "TIME_WITH_TIMEZONE"
+        },
+        {
+          "name": "TINYINT"
+        },
+        {
+          "name": "VARBINARY"
+        },
+        {
+          "name": "VARCHAR"
+        }
+      ]
     },
     {
       "type": "java.sql.Wrapper"
@@ -7814,25 +6603,16 @@
       "type": "java.util.AbstractCollection"
     },
     {
-      "type": "java.util.ArrayList",
-      "methods": [
-        {
-          "name": "<init>",
-          "parameterTypes": []
-        }
-      ]
+      "type": "java.util.AbstractMap"
+    },
+    {
+      "type": "java.util.ArrayList"
     },
     {
       "type": "java.util.Collection"
     },
     {
-      "type": "java.util.Collections$UnmodifiableCollection"
-    },
-    {
-      "type": "java.util.Collections$UnmodifiableList"
-    },
-    {
-      "type": "java.util.Collections$UnmodifiableRandomAccessList"
+      "type": "java.util.Collections$UnmodifiableMap"
     },
     {
       "type": "java.util.Comparator"
@@ -7850,13 +6630,13 @@
       "type": "java.util.HashMap"
     },
     {
+      "type": "java.util.HashMap$Node[]"
+    },
+    {
       "type": "java.util.ImmutableCollections$AbstractImmutableCollection"
     },
     {
       "type": "java.util.ImmutableCollections$AbstractImmutableList"
-    },
-    {
-      "type": "java.util.ImmutableCollections$List12"
     },
     {
       "type": "java.util.ImmutableCollections$ListN"
@@ -7893,6 +6673,9 @@
     },
     {
       "type": "java.util.RandomAccess"
+    },
+    {
+      "type": "java.util.SequencedMap"
     },
     {
       "type": "java.util.ServiceLoader"
@@ -8024,9 +6807,6 @@
       "type": "java.util.stream.Stream"
     },
     {
-      "type": "java.util.zip.DeflaterInputStream"
-    },
-    {
       "type": "javafx.beans.value.ObservableValue"
     },
     {
@@ -8119,22 +6899,10 @@
       "type": "jdk.internal.vm.annotation.ReservedStackAccess"
     },
     {
-      "type": "kotlin.Any"
-    },
-    {
       "type": "kotlin.Boolean"
     },
     {
-      "type": "kotlin.Float"
-    },
-    {
-      "type": "kotlin.Function1"
-    },
-    {
       "type": "kotlin.Int"
-    },
-    {
-      "type": "kotlin.Long"
     },
     {
       "type": "kotlin.Metadata",
@@ -8174,16 +6942,7 @@
       ]
     },
     {
-      "type": "kotlin.Number"
-    },
-    {
       "type": "kotlin.SafePublicationLazyImpl"
-    },
-    {
-      "type": "kotlin.String"
-    },
-    {
-      "type": "kotlin.Unit"
     },
     {
       "type": "kotlin.annotation.MustBeDocumented"
@@ -8193,15 +6952,6 @@
     },
     {
       "type": "kotlin.annotation.Target"
-    },
-    {
-      "type": "kotlin.collections.List"
-    },
-    {
-      "type": "kotlin.collections.Map"
-    },
-    {
-      "type": "kotlin.collections.MutableMap"
     },
     {
       "type": "kotlin.coroutines.Continuation"
@@ -8225,9 +6975,6 @@
       ]
     },
     {
-      "type": "kotlin.reflect.jvm.internal.impl.km.jvm.internal.JvmMetadataExtensions"
-    },
-    {
       "type": "kotlin.reflect.jvm.internal.impl.load.java.ErasedOverridabilityCondition"
     },
     {
@@ -8235,44 +6982,6 @@
     },
     {
       "type": "kotlin.reflect.jvm.internal.impl.load.java.JavaIncompatibilityRulesOverridabilityCondition"
-    },
-    {
-      "type": "kotlin.reflect.jvm.internal.impl.resolve.scopes.DescriptorKindFilter",
-      "fields": [
-        {
-          "name": "ALL"
-        },
-        {
-          "name": "CALLABLES"
-        },
-        {
-          "name": "CLASSIFIERS"
-        },
-        {
-          "name": "Companion"
-        },
-        {
-          "name": "FUNCTIONS"
-        },
-        {
-          "name": "NON_SINGLETON_CLASSIFIERS"
-        },
-        {
-          "name": "PACKAGES"
-        },
-        {
-          "name": "SINGLETON_CLASSIFIERS"
-        },
-        {
-          "name": "TYPE_ALIASES"
-        },
-        {
-          "name": "VALUES"
-        },
-        {
-          "name": "VARIABLES"
-        }
-      ]
     },
     {
       "type": "kotlinx.coroutines.reactor.MonoKt"
@@ -8351,164 +7060,6 @@
           "parameterTypes": []
         }
       ]
-    },
-    {
-      "type": "org.apache.ibatis.annotations.DeleteProvider",
-      "methods": [
-        {
-          "name": "method",
-          "parameterTypes": []
-        },
-        {
-          "name": "type",
-          "parameterTypes": []
-        },
-        {
-          "name": "value",
-          "parameterTypes": []
-        }
-      ]
-    },
-    {
-      "type": "org.apache.ibatis.annotations.InsertProvider",
-      "methods": [
-        {
-          "name": "method",
-          "parameterTypes": []
-        },
-        {
-          "name": "type",
-          "parameterTypes": []
-        },
-        {
-          "name": "value",
-          "parameterTypes": []
-        }
-      ]
-    },
-    {
-      "type": "org.apache.ibatis.annotations.SelectProvider",
-      "methods": [
-        {
-          "name": "method",
-          "parameterTypes": []
-        },
-        {
-          "name": "type",
-          "parameterTypes": []
-        },
-        {
-          "name": "value",
-          "parameterTypes": []
-        }
-      ]
-    },
-    {
-      "type": "org.apache.ibatis.annotations.UpdateProvider",
-      "methods": [
-        {
-          "name": "method",
-          "parameterTypes": []
-        },
-        {
-          "name": "type",
-          "parameterTypes": []
-        },
-        {
-          "name": "value",
-          "parameterTypes": []
-        }
-      ]
-    },
-    {
-      "type": "org.apache.ibatis.cursor.Cursor"
-    },
-    {
-      "type": "org.apache.ibatis.executor.Executor"
-    },
-    {
-      "type": "org.apache.ibatis.javassist.util.proxy.ProxyFactory"
-    },
-    {
-      "type": "org.apache.ibatis.logging.slf4j.Slf4jImpl",
-      "methods": [
-        {
-          "name": "<init>",
-          "parameterTypes": [
-            "java.lang.String"
-          ]
-        }
-      ]
-    },
-    {
-      "type": "org.apache.ibatis.mapping.Environment"
-    },
-    {
-      "type": "org.apache.ibatis.scripting.LanguageDriver"
-    },
-    {
-      "type": "org.apache.ibatis.scripting.defaults.RawLanguageDriver",
-      "methods": [
-        {
-          "name": "<init>",
-          "parameterTypes": []
-        }
-      ]
-    },
-    {
-      "type": "org.apache.ibatis.scripting.xmltags.XMLLanguageDriver",
-      "methods": [
-        {
-          "name": "<init>",
-          "parameterTypes": []
-        }
-      ]
-    },
-    {
-      "type": "org.apache.ibatis.session.Configuration"
-    },
-    {
-      "type": "org.apache.ibatis.session.ExecutorType"
-    },
-    {
-      "type": "org.apache.ibatis.session.ResultHandler"
-    },
-    {
-      "type": "org.apache.ibatis.session.RowBounds"
-    },
-    {
-      "type": "org.apache.ibatis.session.SqlSession",
-      "methods": [
-        {
-          "name": "selectList",
-          "parameterTypes": [
-            "java.lang.String",
-            "java.lang.Object"
-          ]
-        },
-        {
-          "name": "update",
-          "parameterTypes": [
-            "java.lang.String",
-            "java.lang.Object"
-          ]
-        }
-      ]
-    },
-    {
-      "type": "org.apache.ibatis.session.SqlSessionFactory"
-    },
-    {
-      "type": "org.apache.ibatis.session.TransactionIsolationLevel"
-    },
-    {
-      "type": "org.apache.ibatis.session.defaults.DefaultSqlSessionFactory"
-    },
-    {
-      "type": "org.apache.ibatis.transaction.Transaction"
-    },
-    {
-      "type": "org.apache.ibatis.transaction.TransactionFactory"
     },
     {
       "type": "org.apache.logging.log4j.core.LoggerContext"
@@ -9670,6 +8221,39 @@
       "type": "org.eclipse.angus.activation.MimeTypeRegistryProviderImpl"
     },
     {
+      "type": "org.eclipse.angus.mail.imap.IMAPProvider"
+    },
+    {
+      "type": "org.eclipse.angus.mail.imap.IMAPSSLProvider"
+    },
+    {
+      "type": "org.eclipse.angus.mail.pop3.POP3Provider"
+    },
+    {
+      "type": "org.eclipse.angus.mail.pop3.POP3SSLProvider"
+    },
+    {
+      "type": "org.eclipse.angus.mail.smtp.SMTPProvider"
+    },
+    {
+      "type": "org.eclipse.angus.mail.smtp.SMTPSSLProvider"
+    },
+    {
+      "type": "org.eclipse.angus.mail.smtp.SMTPTransport",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": [
+            "jakarta.mail.Session",
+            "jakarta.mail.URLName"
+          ]
+        }
+      ]
+    },
+    {
+      "type": "org.eclipse.angus.mail.util.MailStreamProvider"
+    },
+    {
       "type": "org.eclipse.core.runtime.FileLocator"
     },
     {
@@ -9682,6 +8266,9 @@
       "type": "org.flywaydb.core.Flyway"
     },
     {
+      "type": "org.glassfish.hk2.osgiresourcelocator.ServiceLoader"
+    },
+    {
       "type": "org.h2.Driver"
     },
     {
@@ -9689,6 +8276,24 @@
     },
     {
       "type": "org.hibernate.validator.internal.constraintvalidators.bv.NotBlankValidator",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "org.hibernate.validator.internal.constraintvalidators.bv.PatternValidator",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "org.hibernate.validator.internal.constraintvalidators.bv.notempty.NotEmptyValidatorForMap",
       "methods": [
         {
           "name": "<init>",
@@ -9797,109 +8402,6 @@
     },
     {
       "type": "org.joda.time.ReadableInstant"
-    },
-    {
-      "type": "org.mybatis.scripting.freemarker.FreeMarkerLanguageDriver"
-    },
-    {
-      "type": "org.mybatis.scripting.freemarker.FreeMarkerLanguageDriverConfig"
-    },
-    {
-      "type": "org.mybatis.scripting.thymeleaf.ThymeleafLanguageDriver"
-    },
-    {
-      "type": "org.mybatis.scripting.velocity.Driver"
-    },
-    {
-      "type": "org.mybatis.scripting.velocity.VelocityLanguageDriver"
-    },
-    {
-      "type": "org.mybatis.scripting.velocity.VelocityLanguageDriverConfig"
-    },
-    {
-      "type": "org.mybatis.spring.SqlSessionFactoryBean",
-      "methods": [
-        {
-          "name": "<init>",
-          "parameterTypes": []
-        }
-      ]
-    },
-    {
-      "type": "org.mybatis.spring.SqlSessionTemplate"
-    },
-    {
-      "type": "org.mybatis.spring.annotation.MapperScan"
-    },
-    {
-      "type": "org.mybatis.spring.annotation.MapperScannerRegistrar",
-      "methods": [
-        {
-          "name": "<init>",
-          "parameterTypes": []
-        }
-      ]
-    },
-    {
-      "type": "org.mybatis.spring.mapper.MapperFactoryBean",
-      "methods": [
-        {
-          "name": "<init>",
-          "parameterTypes": [
-            "java.lang.Class"
-          ]
-        },
-        {
-          "name": "setAddToConfig",
-          "parameterTypes": [
-            "boolean"
-          ]
-        },
-        {
-          "name": "setMapperInterface",
-          "parameterTypes": [
-            "java.lang.Class"
-          ]
-        }
-      ]
-    },
-    {
-      "type": "org.mybatis.spring.mapper.MapperScannerConfigurer",
-      "methods": [
-        {
-          "name": "<init>",
-          "parameterTypes": []
-        },
-        {
-          "name": "setBasePackage",
-          "parameterTypes": [
-            "java.lang.String"
-          ]
-        },
-        {
-          "name": "setProcessPropertyPlaceHolders",
-          "parameterTypes": [
-            "boolean"
-          ]
-        }
-      ]
-    },
-    {
-      "type": "org.mybatis.spring.support.SqlSessionDaoSupport",
-      "methods": [
-        {
-          "name": "setSqlSessionFactory",
-          "parameterTypes": [
-            "org.apache.ibatis.session.SqlSessionFactory"
-          ]
-        },
-        {
-          "name": "setSqlSessionTemplate",
-          "parameterTypes": [
-            "org.mybatis.spring.SqlSessionTemplate"
-          ]
-        }
-      ]
     },
     {
       "type": "org.osgi.framework.FrameworkUtil"
@@ -10761,12 +9263,6 @@
       "type": "org.springframework.aot.generate.Generated"
     },
     {
-      "type": "org.springframework.aot.generate.GenerationContext"
-    },
-    {
-      "type": "org.springframework.aot.hint.RuntimeHints"
-    },
-    {
       "type": "org.springframework.aot.hint.annotation.Reflective"
     },
     {
@@ -10792,9 +9288,6 @@
     },
     {
       "type": "org.springframework.beans.factory.BeanFactoryInitializer"
-    },
-    {
-      "type": "org.springframework.beans.factory.BeanInitializationException"
     },
     {
       "type": "org.springframework.beans.factory.BeanNameAware"
@@ -10836,19 +9329,10 @@
       "type": "org.springframework.beans.factory.annotation.Value"
     },
     {
-      "type": "org.springframework.beans.factory.aot.BeanFactoryInitializationAotContribution"
-    },
-    {
       "type": "org.springframework.beans.factory.aot.BeanFactoryInitializationAotProcessor"
     },
     {
-      "type": "org.springframework.beans.factory.aot.BeanFactoryInitializationCode"
-    },
-    {
       "type": "org.springframework.beans.factory.aot.BeanRegistrationAotProcessor"
-    },
-    {
-      "type": "org.springframework.beans.factory.aot.BeanRegistrationExcludeFilter"
     },
     {
       "type": "org.springframework.beans.factory.config.BeanDefinition"
@@ -10885,12 +9369,6 @@
     },
     {
       "type": "org.springframework.beans.factory.support.NullBean"
-    },
-    {
-      "type": "org.springframework.beans.factory.support.RegisteredBean"
-    },
-    {
-      "type": "org.springframework.beans.factory.support.RootBeanDefinition"
     },
     {
       "type": "org.springframework.boot.ApplicationProperties",
@@ -11300,6 +9778,12 @@
       "type": "org.springframework.boot.actuate.endpoint.OperationFilter"
     },
     {
+      "type": "org.springframework.boot.actuate.endpoint.OperationResponseBody"
+    },
+    {
+      "type": "org.springframework.boot.actuate.endpoint.OperationResponseBodyMap"
+    },
+    {
       "type": "org.springframework.boot.actuate.endpoint.OperationType"
     },
     {
@@ -11447,7 +9931,13 @@
       "type": "org.springframework.boot.actuate.info.InfoContributor"
     },
     {
-      "type": "org.springframework.boot.actuate.info.InfoEndpoint"
+      "type": "org.springframework.boot.actuate.info.InfoEndpoint",
+      "methods": [
+        {
+          "name": "info",
+          "parameterTypes": []
+        }
+      ]
     },
     {
       "type": "org.springframework.boot.actuate.info.JavaInfoContributor"
@@ -11465,13 +9955,36 @@
       "type": "org.springframework.boot.actuate.logging.LogFileWebEndpoint"
     },
     {
-      "type": "org.springframework.boot.actuate.logging.LoggersEndpoint"
+      "type": "org.springframework.boot.actuate.logging.LoggersEndpoint",
+      "methods": [
+        {
+          "name": "loggerLevels",
+          "parameterTypes": [
+            "java.lang.String"
+          ]
+        }
+      ]
     },
     {
-      "type": "org.springframework.boot.actuate.logging.LoggersEndpoint$LoggerLevelsDescriptor"
+      "type": "org.springframework.boot.actuate.logging.LoggersEndpoint$LoggerLevelsDescriptor",
+      "methods": [
+        {
+          "name": "getConfiguredLevel",
+          "parameterTypes": []
+        }
+      ]
     },
     {
       "type": "org.springframework.boot.actuate.logging.LoggersEndpoint$LoggersDescriptor"
+    },
+    {
+      "type": "org.springframework.boot.actuate.logging.LoggersEndpoint$SingleLoggerLevelsDescriptor",
+      "methods": [
+        {
+          "name": "getEffectiveLevel",
+          "parameterTypes": []
+        }
+      ]
     },
     {
       "type": "org.springframework.boot.actuate.management.HeapDumpWebEndpoint"
@@ -11823,12 +10336,6 @@
     },
     {
       "type": "org.springframework.boot.autoconfigure.info.ProjectInfoProperties$Git"
-    },
-    {
-      "type": "org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration"
-    },
-    {
-      "type": "org.springframework.boot.autoconfigure.jdbc.DataSourceTransactionManagerAutoConfiguration"
     },
     {
       "type": "org.springframework.boot.autoconfigure.logging.ConditionEvaluationReportLoggingListener",
@@ -12438,7 +10945,21 @@
       "type": "org.springframework.boot.health.actuate.endpoint.AdditionalHealthEndpointPath"
     },
     {
-      "type": "org.springframework.boot.health.actuate.endpoint.CompositeHealthDescriptor"
+      "type": "org.springframework.boot.health.actuate.endpoint.CompositeHealthDescriptor",
+      "methods": [
+        {
+          "name": "getComponents",
+          "parameterTypes": []
+        },
+        {
+          "name": "getDetails",
+          "parameterTypes": []
+        },
+        {
+          "name": "getStatus",
+          "parameterTypes": []
+        }
+      ]
     },
     {
       "type": "org.springframework.boot.health.actuate.endpoint.Contributor"
@@ -12468,7 +10989,30 @@
       "type": "org.springframework.boot.health.actuate.endpoint.HttpCodeStatusMapper"
     },
     {
-      "type": "org.springframework.boot.health.actuate.endpoint.ReactiveHealthEndpointWebExtension"
+      "type": "org.springframework.boot.health.actuate.endpoint.IndicatedHealthDescriptor",
+      "methods": [
+        {
+          "name": "getDetails",
+          "parameterTypes": []
+        },
+        {
+          "name": "getStatus",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "org.springframework.boot.health.actuate.endpoint.ReactiveHealthEndpointWebExtension",
+      "methods": [
+        {
+          "name": "health",
+          "parameterTypes": [
+            "org.springframework.boot.actuate.endpoint.ApiVersion",
+            "org.springframework.boot.actuate.endpoint.web.WebServerNamespace",
+            "org.springframework.boot.actuate.endpoint.SecurityContext"
+          ]
+        }
+      ]
     },
     {
       "type": "org.springframework.boot.health.actuate.endpoint.SimpleHttpCodeStatusMapper"
@@ -12478,6 +11022,15 @@
     },
     {
       "type": "org.springframework.boot.health.actuate.endpoint.StatusAggregator"
+    },
+    {
+      "type": "org.springframework.boot.health.actuate.endpoint.SystemHealthDescriptor",
+      "methods": [
+        {
+          "name": "getGroups",
+          "parameterTypes": []
+        }
+      ]
     },
     {
       "type": "org.springframework.boot.health.application.AvailabilityStateHealthIndicator"
@@ -12813,7 +11366,17 @@
       "type": "org.springframework.boot.health.contributor.ReactiveHealthContributors"
     },
     {
-      "type": "org.springframework.boot.health.contributor.Status"
+      "type": "org.springframework.boot.health.contributor.Status",
+      "methods": [
+        {
+          "name": "getCode",
+          "parameterTypes": []
+        },
+        {
+          "name": "getDescription",
+          "parameterTypes": []
+        }
+      ]
     },
     {
       "type": "org.springframework.boot.health.registry.AbstractRegistry"
@@ -13569,13 +12132,25 @@
       "type": "org.springframework.boot.micrometer.metrics.MaximumAllowableTagsMeterFilter"
     },
     {
-      "type": "org.springframework.boot.micrometer.metrics.actuate.endpoint.MetricsEndpoint"
+      "type": "org.springframework.boot.micrometer.metrics.actuate.endpoint.MetricsEndpoint",
+      "methods": [
+        {
+          "name": "listNames",
+          "parameterTypes": []
+        }
+      ]
     },
     {
       "type": "org.springframework.boot.micrometer.metrics.actuate.endpoint.MetricsEndpoint$MetricDescriptor"
     },
     {
-      "type": "org.springframework.boot.micrometer.metrics.actuate.endpoint.MetricsEndpoint$MetricNamesDescriptor"
+      "type": "org.springframework.boot.micrometer.metrics.actuate.endpoint.MetricsEndpoint$MetricNamesDescriptor",
+      "methods": [
+        {
+          "name": "getNames",
+          "parameterTypes": []
+        }
+      ]
     },
     {
       "type": "org.springframework.boot.micrometer.metrics.autoconfigure.CompositeMeterRegistryAutoConfiguration",
@@ -15238,7 +13813,15 @@
       "type": "org.springframework.boot.webflux.actuate.endpoint.web.AbstractWebFluxEndpointHandlerMapping$ReactiveWebOperation"
     },
     {
-      "type": "org.springframework.boot.webflux.actuate.endpoint.web.AbstractWebFluxEndpointHandlerMapping$ReadOperationHandler"
+      "type": "org.springframework.boot.webflux.actuate.endpoint.web.AbstractWebFluxEndpointHandlerMapping$ReadOperationHandler",
+      "methods": [
+        {
+          "name": "handle",
+          "parameterTypes": [
+            "org.springframework.web.server.ServerWebExchange"
+          ]
+        }
+      ]
     },
     {
       "type": "org.springframework.boot.webflux.actuate.endpoint.web.AbstractWebFluxEndpointHandlerMapping$WriteOperationHandler"
@@ -15919,12 +14502,6 @@
     },
     {
       "type": "org.springframework.dao.annotation.PersistenceExceptionTranslationPostProcessor"
-    },
-    {
-      "type": "org.springframework.dao.support.DaoSupport"
-    },
-    {
-      "type": "org.springframework.dao.support.PersistenceExceptionTranslator"
     },
     {
       "type": "org.springframework.data.jpa.repository.config.EnableJpaRepositories"
@@ -17931,6 +16508,15 @@
       ]
     },
     {
+      "type": "sun.security.ssl.KeyManagerFactoryImpl$SunX509",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
       "type": "sun.security.ssl.SSLContextImpl",
       "fields": [
         {
@@ -17943,6 +16529,15 @@
     },
     {
       "type": "sun.security.ssl.SSLContextImpl$CustomizedTLSContext"
+    },
+    {
+      "type": "sun.security.ssl.SSLContextImpl$DefaultSSLContext",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
     },
     {
       "type": "sun.security.ssl.SSLContextImpl$TLSContext",
@@ -18418,90 +17013,6 @@
     {
       "type": {
         "proxy": [
-          "com.involutionhell.backend.rag.document.persistence.mybatis.RagDocumentMapper"
-        ]
-      }
-    },
-    {
-      "type": {
-        "proxy": [
-          "com.involutionhell.backend.rag.indexing.persistence.mybatis.RagChunkMapper"
-        ]
-      }
-    },
-    {
-      "type": {
-        "proxy": [
-          "com.involutionhell.backend.rag.indexing.persistence.mybatis.RagEmbeddingCacheMapper"
-        ]
-      }
-    },
-    {
-      "type": {
-        "proxy": [
-          "com.involutionhell.backend.rag.indexing.persistence.mybatis.RagIndexJobMapper"
-        ]
-      }
-    },
-    {
-      "type": {
-        "proxy": [
-          "com.involutionhell.backend.rag.indexing.persistence.mybatis.RagIndexJobTransitionMapper"
-        ]
-      }
-    },
-    {
-      "type": {
-        "proxy": [
-          "com.involutionhell.backend.rag.indexing.persistence.mybatis.RagIndexMessageFailureMapper"
-        ]
-      }
-    },
-    {
-      "type": {
-        "proxy": [
-          "com.involutionhell.backend.rag.indexing.persistence.mybatis.RagIndexOutboxMapper"
-        ]
-      }
-    },
-    {
-      "type": {
-        "proxy": [
-          "com.involutionhell.backend.rag.retrieval.persistence.mybatis.RagAskRunMapper"
-        ]
-      }
-    },
-    {
-      "type": {
-        "proxy": [
-          "com.involutionhell.backend.rag.retrieval.persistence.mybatis.RagConversationMapper"
-        ]
-      }
-    },
-    {
-      "type": {
-        "proxy": [
-          "com.involutionhell.backend.rag.retrieval.persistence.mybatis.RagConversationMessageMapper"
-        ]
-      }
-    },
-    {
-      "type": {
-        "proxy": [
-          "com.involutionhell.backend.rag.retrieval.persistence.mybatis.RagUserMapper"
-        ]
-      }
-    },
-    {
-      "type": {
-        "proxy": [
-          "com.mybatisflex.core.row.RowMapper"
-        ]
-      }
-    },
-    {
-      "type": {
-        "proxy": [
           "java.lang.reflect.ParameterizedType",
           "org.springframework.core.SerializableTypeWrapper$SerializableTypeProxy",
           "java.io.Serializable"
@@ -18536,13 +17047,6 @@
     {
       "type": {
         "proxy": [
-          "org.apache.ibatis.session.SqlSession"
-        ]
-      }
-    },
-    {
-      "type": {
-        "proxy": [
           "org.springframework.boot.actuate.endpoint.annotation.EndpointExtension"
         ]
       }
@@ -18565,6 +17069,13 @@
       "type": {
         "proxy": [
           "org.springframework.context.event.EventListener"
+        ]
+      }
+    },
+    {
+      "type": {
+        "proxy": [
+          "org.springframework.jdbc.datasource.ConnectionProxy"
         ]
       }
     },
@@ -18764,49 +17275,25 @@
   ],
   "resources": [
     {
-      "glob": "/com/involutionhell/backend/rag/document/persistence/mybatis/RagDocumentMapper.xml"
-    },
-    {
-      "glob": "/com/involutionhell/backend/rag/indexing/persistence/mybatis/RagChunkMapper.xml"
-    },
-    {
-      "glob": "/com/involutionhell/backend/rag/indexing/persistence/mybatis/RagEmbeddingCacheMapper.xml"
-    },
-    {
-      "glob": "/com/involutionhell/backend/rag/indexing/persistence/mybatis/RagIndexJobMapper.xml"
-    },
-    {
-      "glob": "/com/involutionhell/backend/rag/indexing/persistence/mybatis/RagIndexJobTransitionMapper.xml"
-    },
-    {
-      "glob": "/com/involutionhell/backend/rag/indexing/persistence/mybatis/RagIndexMessageFailureMapper.xml"
-    },
-    {
-      "glob": "/com/involutionhell/backend/rag/indexing/persistence/mybatis/RagIndexOutboxMapper.xml"
-    },
-    {
-      "glob": "/com/involutionhell/backend/rag/retrieval/persistence/mybatis/RagAskRunMapper.xml"
-    },
-    {
-      "glob": "/com/involutionhell/backend/rag/retrieval/persistence/mybatis/RagConversationMapper.xml"
-    },
-    {
-      "glob": "/com/involutionhell/backend/rag/retrieval/persistence/mybatis/RagConversationMessageMapper.xml"
-    },
-    {
-      "glob": "/com/involutionhell/backend/rag/retrieval/persistence/mybatis/RagUserMapper.xml"
-    },
-    {
-      "glob": "/com/mybatisflex/core/row/RowMapper.xml"
-    },
-    {
       "glob": "META-INF/build-info.properties"
+    },
+    {
+      "glob": "META-INF/jakarta.address.map"
+    },
+    {
+      "glob": "META-INF/jakarta.default.address.map"
+    },
+    {
+      "glob": "META-INF/jakarta.default.providers"
     },
     {
       "glob": "META-INF/jakarta.mime.types"
     },
     {
       "glob": "META-INF/jakarta.mimetypes.default"
+    },
+    {
+      "glob": "META-INF/jakarta.providers"
     },
     {
       "glob": "META-INF/mime.types"
@@ -18860,6 +17347,12 @@
       "glob": "META-INF/services/jakarta.el.ExpressionFactory"
     },
     {
+      "glob": "META-INF/services/jakarta.mail.Provider"
+    },
+    {
+      "glob": "META-INF/services/jakarta.mail.util.StreamProvider"
+    },
+    {
       "glob": "META-INF/services/jakarta.validation.ConstraintValidator"
     },
     {
@@ -18885,9 +17378,6 @@
     },
     {
       "glob": "META-INF/services/javax.xml.parsers.SAXParserFactory"
-    },
-    {
-      "glob": "META-INF/services/kotlin.reflect.jvm.internal.impl.km.internal.extensions.MetadataExtensions"
     },
     {
       "glob": "META-INF/services/kotlin.reflect.jvm.internal.impl.resolve.ExternalOverridabilityCondition"
@@ -19019,9 +17509,6 @@
       "glob": "\\[Lcom/involutionhell/backend/rag/indexing/workflow/IndexWorkflowTriggerType;.class"
     },
     {
-      "glob": "\\[Lcom/involutionhell/backend/rag/retrieval/api/RagConversationSummaryView;.class"
-    },
-    {
       "glob": "\\[Lcom/involutionhell/backend/rag/retrieval/harness/RagQueryHarnessStage;.class"
     },
     {
@@ -19029,24 +17516,6 @@
     },
     {
       "glob": "\\[Lcom/knuddels/jtokkit/api/EncodingType;.class"
-    },
-    {
-      "glob": "\\[Lcom/mybatisflex/annotation/KeyType;.class"
-    },
-    {
-      "glob": "\\[Lcom/mybatisflex/core/query/QueryColumn;.class"
-    },
-    {
-      "glob": "\\[Lcom/mybatisflex/core/query/QueryOrderBy;.class"
-    },
-    {
-      "glob": "\\[Lcom/mybatisflex/core/query/QueryTable;.class"
-    },
-    {
-      "glob": "\\[Lcom/mybatisflex/core/row/RowKey;.class"
-    },
-    {
-      "glob": "\\[Lcom/mybatisflex/core/util/LambdaGetter;.class"
     },
     {
       "glob": "\\[Lio/micrometer/core/instrument/config/MeterFilter;.class"
@@ -19241,12 +17710,6 @@
       "glob": "\\[Ljava/util/concurrent/TimeUnit;.class"
     },
     {
-      "glob": "\\[Ljava/util/function/Consumer;.class"
-    },
-    {
-      "glob": "\\[Ljava/util/function/Function;.class"
-    },
-    {
       "glob": "\\[Ljava/util/regex/IntHashSet;.class"
     },
     {
@@ -19256,37 +17719,7 @@
       "glob": "\\[Ljava/util/stream/Collector$Characteristics;.class"
     },
     {
-      "glob": "\\[Lorg/apache/ibatis/annotations/DeleteProvider;.class"
-    },
-    {
-      "glob": "\\[Lorg/apache/ibatis/annotations/InsertProvider;.class"
-    },
-    {
-      "glob": "\\[Lorg/apache/ibatis/annotations/SelectProvider;.class"
-    },
-    {
-      "glob": "\\[Lorg/apache/ibatis/annotations/UpdateProvider;.class"
-    },
-    {
-      "glob": "\\[Lorg/apache/ibatis/mapping/ResultFlag;.class"
-    },
-    {
-      "glob": "\\[Lorg/apache/ibatis/plugin/Interceptor;.class"
-    },
-    {
-      "glob": "\\[Lorg/apache/ibatis/scripting/LanguageDriver;.class"
-    },
-    {
-      "glob": "\\[Lorg/apache/ibatis/type/JdbcType;.class"
-    },
-    {
-      "glob": "\\[Lorg/apache/ibatis/type/TypeHandler;.class"
-    },
-    {
       "glob": "\\[Lorg/apache/rocketmq/client/apis/consumer/ConsumeResult;.class"
-    },
-    {
-      "glob": "\\[Lorg/mybatis/spring/annotation/MapperScan;.class"
     },
     {
       "glob": "\\[Lorg/reactivestreams/Publisher;.class"
@@ -19314,9 +17747,6 @@
     },
     {
       "glob": "\\[Lorg/springframework/aot/hint/TypeReference;.class"
-    },
-    {
-      "glob": "\\[Lorg/springframework/beans/PropertyValue;.class"
     },
     {
       "glob": "\\[Lorg/springframework/boot/ExitCodeGenerator;.class"
@@ -19353,9 +17783,6 @@
     },
     {
       "glob": "\\[Lorg/springframework/context/annotation/ScopedProxyMode;.class"
-    },
-    {
-      "glob": "\\[Lorg/springframework/core/ResolvableType;.class"
     },
     {
       "glob": "\\[Lorg/springframework/core/annotation/MergedAnnotation$Adapt;.class"
@@ -19472,9 +17899,6 @@
       "glob": "\\[\\[J.class"
     },
     {
-      "glob": "\\[\\[Lcom/mybatisflex/core/query/QueryColumn;.class"
-    },
-    {
       "glob": "\\[\\[Ljava/lang/StackTraceElement;.class"
     },
     {
@@ -19587,18 +18011,6 @@
     },
     {
       "glob": "char.class"
-    },
-    {
-      "glob": "com/alibaba/druid/spring/boot/autoconfigure$DruidDataSourceAutoConfigure.class"
-    },
-    {
-      "glob": "com/alibaba/druid/spring/boot/autoconfigure/DruidDataSourceAutoConfigure.class"
-    },
-    {
-      "glob": "com/alibaba/druid/spring/boot4/autoconfigure$DruidDataSourceAutoConfigure.class"
-    },
-    {
-      "glob": "com/alibaba/druid/spring/boot4/autoconfigure/DruidDataSourceAutoConfigure.class"
     },
     {
       "glob": "com/fasterxml/jackson/annotation/JacksonAnnotation.class"
@@ -20066,16 +18478,7 @@
       "glob": "com/involutionhell/backend/rag/document/persistence/RagDocumentRepository.class"
     },
     {
-      "glob": "com/involutionhell/backend/rag/document/persistence/mybatis"
-    },
-    {
-      "glob": "com/involutionhell/backend/rag/document/persistence/mybatis/DocumentMyBatisFlexConfiguration.class"
-    },
-    {
-      "glob": "com/involutionhell/backend/rag/document/persistence/mybatis/MyBatisFlexRagDocumentRepository.class"
-    },
-    {
-      "glob": "com/involutionhell/backend/rag/document/persistence/mybatis/RagDocumentMapper.xml"
+      "glob": "com/involutionhell/backend/rag/document/persistence/jdbc/JdbcRagDocumentRepository.class"
     },
     {
       "glob": "com/involutionhell/backend/rag/document/spi/DocumentIndexingSpi.class"
@@ -20183,46 +18586,25 @@
       "glob": "com/involutionhell/backend/rag/indexing/persistence/RagIndexOutboxRepository.class"
     },
     {
-      "glob": "com/involutionhell/backend/rag/indexing/persistence/mybatis"
+      "glob": "com/involutionhell/backend/rag/indexing/persistence/jdbc/JdbcRagChunkRepository.class"
     },
     {
-      "glob": "com/involutionhell/backend/rag/indexing/persistence/mybatis/IndexingMyBatisFlexConfiguration.class"
+      "glob": "com/involutionhell/backend/rag/indexing/persistence/jdbc/JdbcRagEmbeddingCacheRepository$CacheEntry.class"
     },
     {
-      "glob": "com/involutionhell/backend/rag/indexing/persistence/mybatis/MyBatisFlexRagChunkRepository.class"
+      "glob": "com/involutionhell/backend/rag/indexing/persistence/jdbc/JdbcRagEmbeddingCacheRepository.class"
     },
     {
-      "glob": "com/involutionhell/backend/rag/indexing/persistence/mybatis/MyBatisFlexRagEmbeddingCacheRepository.class"
+      "glob": "com/involutionhell/backend/rag/indexing/persistence/jdbc/JdbcRagIndexJobRepository.class"
     },
     {
-      "glob": "com/involutionhell/backend/rag/indexing/persistence/mybatis/MyBatisFlexRagIndexJobRepository.class"
+      "glob": "com/involutionhell/backend/rag/indexing/persistence/jdbc/JdbcRagIndexJobTransitionRepository.class"
     },
     {
-      "glob": "com/involutionhell/backend/rag/indexing/persistence/mybatis/MyBatisFlexRagIndexJobTransitionRepository.class"
+      "glob": "com/involutionhell/backend/rag/indexing/persistence/jdbc/JdbcRagIndexMessageFailureRepository.class"
     },
     {
-      "glob": "com/involutionhell/backend/rag/indexing/persistence/mybatis/MyBatisFlexRagIndexMessageFailureRepository.class"
-    },
-    {
-      "glob": "com/involutionhell/backend/rag/indexing/persistence/mybatis/MyBatisFlexRagIndexOutboxRepository.class"
-    },
-    {
-      "glob": "com/involutionhell/backend/rag/indexing/persistence/mybatis/RagChunkMapper.xml"
-    },
-    {
-      "glob": "com/involutionhell/backend/rag/indexing/persistence/mybatis/RagEmbeddingCacheMapper.xml"
-    },
-    {
-      "glob": "com/involutionhell/backend/rag/indexing/persistence/mybatis/RagIndexJobMapper.xml"
-    },
-    {
-      "glob": "com/involutionhell/backend/rag/indexing/persistence/mybatis/RagIndexJobTransitionMapper.xml"
-    },
-    {
-      "glob": "com/involutionhell/backend/rag/indexing/persistence/mybatis/RagIndexMessageFailureMapper.xml"
-    },
-    {
-      "glob": "com/involutionhell/backend/rag/indexing/persistence/mybatis/RagIndexOutboxMapper.xml"
+      "glob": "com/involutionhell/backend/rag/indexing/persistence/jdbc/JdbcRagIndexOutboxRepository.class"
     },
     {
       "glob": "com/involutionhell/backend/rag/indexing/service/RagIndexingFailureClassifier.class"
@@ -20256,21 +18638,6 @@
     },
     {
       "glob": "com/involutionhell/backend/rag/indexing/workflow/IndexWorkflowStateMachineFactory.class"
-    },
-    {
-      "glob": "com/involutionhell/backend/rag/infrastructure/config/MyBatisNativeConfiguration$MyBatisFlexBeanFactoryInitializationAotProcessor.class"
-    },
-    {
-      "glob": "com/involutionhell/backend/rag/infrastructure/config/MyBatisNativeConfiguration$MyBatisFlexMapperFactoryBeanPostProcessor.class"
-    },
-    {
-      "glob": "com/involutionhell/backend/rag/infrastructure/config/MyBatisNativeConfiguration$MyBatisFlexRuntimeHintsRegistrar.class"
-    },
-    {
-      "glob": "com/involutionhell/backend/rag/infrastructure/config/MyBatisNativeConfiguration$MyBatisMapperTypeUtils.class"
-    },
-    {
-      "glob": "com/involutionhell/backend/rag/infrastructure/config/MyBatisNativeConfiguration.class"
     },
     {
       "glob": "com/involutionhell/backend/rag/infrastructure/config/RagConcurrencyConfiguration.class"
@@ -20345,34 +18712,16 @@
       "glob": "com/involutionhell/backend/rag/retrieval/persistence/RagUserRepository.class"
     },
     {
-      "glob": "com/involutionhell/backend/rag/retrieval/persistence/mybatis"
+      "glob": "com/involutionhell/backend/rag/retrieval/persistence/jdbc/JdbcRagAskRunRepository.class"
     },
     {
-      "glob": "com/involutionhell/backend/rag/retrieval/persistence/mybatis/MyBatisFlexRagAskRunRepository.class"
+      "glob": "com/involutionhell/backend/rag/retrieval/persistence/jdbc/JdbcRagConversationMessageRepository.class"
     },
     {
-      "glob": "com/involutionhell/backend/rag/retrieval/persistence/mybatis/MyBatisFlexRagConversationMessageRepository.class"
+      "glob": "com/involutionhell/backend/rag/retrieval/persistence/jdbc/JdbcRagConversationRepository.class"
     },
     {
-      "glob": "com/involutionhell/backend/rag/retrieval/persistence/mybatis/MyBatisFlexRagConversationRepository.class"
-    },
-    {
-      "glob": "com/involutionhell/backend/rag/retrieval/persistence/mybatis/MyBatisFlexRagUserRepository.class"
-    },
-    {
-      "glob": "com/involutionhell/backend/rag/retrieval/persistence/mybatis/RagAskRunMapper.xml"
-    },
-    {
-      "glob": "com/involutionhell/backend/rag/retrieval/persistence/mybatis/RagConversationMapper.xml"
-    },
-    {
-      "glob": "com/involutionhell/backend/rag/retrieval/persistence/mybatis/RagConversationMessageMapper.xml"
-    },
-    {
-      "glob": "com/involutionhell/backend/rag/retrieval/persistence/mybatis/RagUserMapper.xml"
-    },
-    {
-      "glob": "com/involutionhell/backend/rag/retrieval/persistence/mybatis/RetrievalMyBatisFlexConfiguration.class"
+      "glob": "com/involutionhell/backend/rag/retrieval/persistence/jdbc/JdbcRagUserRepository.class"
     },
     {
       "glob": "com/involutionhell/backend/rag/retrieval/service/DefaultRagRetrievalBudgetPlanner$QueryShape.class"
@@ -20499,243 +18848,6 @@
     },
     {
       "glob": "com/knuddels/jtokkit/cl100k_base.tiktoken"
-    },
-    {
-      "glob": "com/mybatisflex/annotation/Column.class"
-    },
-    {
-      "glob": "com/mybatisflex/annotation/Id.class"
-    },
-    {
-      "glob": "com/mybatisflex/annotation/InsertListener.class"
-    },
-    {
-      "glob": "com/mybatisflex/annotation/KeyType.class"
-    },
-    {
-      "glob": "com/mybatisflex/annotation/Listener.class"
-    },
-    {
-      "glob": "com/mybatisflex/annotation/SetListener.class"
-    },
-    {
-      "glob": "com/mybatisflex/annotation/Table.class"
-    },
-    {
-      "glob": "com/mybatisflex/annotation/UpdateListener.class"
-    },
-    {
-      "glob": "com/mybatisflex/core/BaseMapper.class"
-    },
-    {
-      "glob": "com/mybatisflex/core/constant/SqlConnector.class"
-    },
-    {
-      "glob": "com/mybatisflex/core/constant/SqlOperator.class"
-    },
-    {
-      "glob": "com/mybatisflex/core/dialect/IDialect.class"
-    },
-    {
-      "glob": "com/mybatisflex/core/dialect/OperateType.class"
-    },
-    {
-      "glob": "com/mybatisflex/core/field/FieldQuery$Builder.class"
-    },
-    {
-      "glob": "com/mybatisflex/core/field/FieldQuery.class"
-    },
-    {
-      "glob": "com/mybatisflex/core/field/FieldQueryBuilder.class"
-    },
-    {
-      "glob": "com/mybatisflex/core/mybatis/FlexConfiguration.class"
-    },
-    {
-      "glob": "com/mybatisflex/core/mybatis/FlexSqlSessionFactoryBuilder.class"
-    },
-    {
-      "glob": "com/mybatisflex/core/paginate/Page.class"
-    },
-    {
-      "glob": "com/mybatisflex/core/provider/EntitySqlProvider.class"
-    },
-    {
-      "glob": "com/mybatisflex/core/query/BaseQueryWrapper.class"
-    },
-    {
-      "glob": "com/mybatisflex/core/query/CPI.class"
-    },
-    {
-      "glob": "com/mybatisflex/core/query/CaseQueryColumn$Builder.class"
-    },
-    {
-      "glob": "com/mybatisflex/core/query/CaseSearchQueryColumn$Builder.class"
-    },
-    {
-      "glob": "com/mybatisflex/core/query/ChainQuery.class"
-    },
-    {
-      "glob": "com/mybatisflex/core/query/CloneSupport.class"
-    },
-    {
-      "glob": "com/mybatisflex/core/query/Conditional.class"
-    },
-    {
-      "glob": "com/mybatisflex/core/query/DistinctQueryColumn.class"
-    },
-    {
-      "glob": "com/mybatisflex/core/query/FieldsBuilder.class"
-    },
-    {
-      "glob": "com/mybatisflex/core/query/FunctionQueryColumn.class"
-    },
-    {
-      "glob": "com/mybatisflex/core/query/HasParamsColumn.class"
-    },
-    {
-      "glob": "com/mybatisflex/core/query/Join.class"
-    },
-    {
-      "glob": "com/mybatisflex/core/query/Joiner.class"
-    },
-    {
-      "glob": "com/mybatisflex/core/query/MapperQueryChain.class"
-    },
-    {
-      "glob": "com/mybatisflex/core/query/QueryChain.class"
-    },
-    {
-      "glob": "com/mybatisflex/core/query/QueryColumn.class"
-    },
-    {
-      "glob": "com/mybatisflex/core/query/QueryCondition.class"
-    },
-    {
-      "glob": "com/mybatisflex/core/query/QueryConditionBuilder.class"
-    },
-    {
-      "glob": "com/mybatisflex/core/query/QueryMethods.class"
-    },
-    {
-      "glob": "com/mybatisflex/core/query/QueryOrderBy.class"
-    },
-    {
-      "glob": "com/mybatisflex/core/query/QueryOrderByBuilder.class"
-    },
-    {
-      "glob": "com/mybatisflex/core/query/QueryTable.class"
-    },
-    {
-      "glob": "com/mybatisflex/core/query/QueryWrapper.class"
-    },
-    {
-      "glob": "com/mybatisflex/core/query/QueryWrapperAdapter.class"
-    },
-    {
-      "glob": "com/mybatisflex/core/query/RawQueryColumn.class"
-    },
-    {
-      "glob": "com/mybatisflex/core/query/RawQueryOrderBy.class"
-    },
-    {
-      "glob": "com/mybatisflex/core/query/RelationsBuilder.class"
-    },
-    {
-      "glob": "com/mybatisflex/core/query/SelectQueryColumn.class"
-    },
-    {
-      "glob": "com/mybatisflex/core/query/SqlOperators.class"
-    },
-    {
-      "glob": "com/mybatisflex/core/query/StringFunctionQueryColumn.class"
-    },
-    {
-      "glob": "com/mybatisflex/core/query/UnionWrapper.class"
-    },
-    {
-      "glob": "com/mybatisflex/core/query/With.class"
-    },
-    {
-      "glob": "com/mybatisflex/core/query/WithBuilder.class"
-    },
-    {
-      "glob": "com/mybatisflex/core/row"
-    },
-    {
-      "glob": "com/mybatisflex/core/row/DbChain.class"
-    },
-    {
-      "glob": "com/mybatisflex/core/row/Row.class"
-    },
-    {
-      "glob": "com/mybatisflex/core/row/RowKey.class"
-    },
-    {
-      "glob": "com/mybatisflex/core/row/RowMapper.xml"
-    },
-    {
-      "glob": "com/mybatisflex/core/table/ColumnInfo.class"
-    },
-    {
-      "glob": "com/mybatisflex/core/table/IdInfo.class"
-    },
-    {
-      "glob": "com/mybatisflex/core/table/TableDef.class"
-    },
-    {
-      "glob": "com/mybatisflex/core/table/TableInfo.class"
-    },
-    {
-      "glob": "com/mybatisflex/core/update/PropertySetter.class"
-    },
-    {
-      "glob": "com/mybatisflex/core/update/RawValue.class"
-    },
-    {
-      "glob": "com/mybatisflex/core/update/UpdateChain.class"
-    },
-    {
-      "glob": "com/mybatisflex/core/update/UpdateWrapper.class"
-    },
-    {
-      "glob": "com/mybatisflex/core/util/LambdaGetter.class"
-    },
-    {
-      "glob": "com/mybatisflex/spring/boot/MybatisFlexAdminAutoConfiguration.class"
-    },
-    {
-      "glob": "com/mybatisflex/spring/boot/MybatisLanguageDriverAutoConfiguration$FreeMarkerConfiguration.class"
-    },
-    {
-      "glob": "com/mybatisflex/spring/boot/MybatisLanguageDriverAutoConfiguration$LegacyFreeMarkerConfiguration.class"
-    },
-    {
-      "glob": "com/mybatisflex/spring/boot/MybatisLanguageDriverAutoConfiguration$LegacyVelocityConfiguration.class"
-    },
-    {
-      "glob": "com/mybatisflex/spring/boot/MybatisLanguageDriverAutoConfiguration$ThymeleafConfiguration.class"
-    },
-    {
-      "glob": "com/mybatisflex/spring/boot/MybatisLanguageDriverAutoConfiguration$VelocityConfiguration.class"
-    },
-    {
-      "glob": "com/mybatisflex/spring/boot/MybatisLanguageDriverAutoConfiguration.class"
-    },
-    {
-      "glob": "com/mybatisflex/spring/boot/v4/FlexTransactionAutoConfiguration.class"
-    },
-    {
-      "glob": "com/mybatisflex/spring/boot/v4/MultiDataSourceAutoConfiguration.class"
-    },
-    {
-      "glob": "com/mybatisflex/spring/boot/v4/MybatisFlexAutoConfiguration$AutoConfiguredMapperScannerRegistrar.class"
-    },
-    {
-      "glob": "com/mybatisflex/spring/boot/v4/MybatisFlexAutoConfiguration$MapperScannerRegistrarNotFoundConfiguration.class"
-    },
-    {
-      "glob": "com/mybatisflex/spring/boot/v4/MybatisFlexAutoConfiguration.class"
     },
     {
       "glob": "commons-logging.properties"
@@ -22229,18 +20341,6 @@
       "glob": "jakarta/validation/metadata/ConstraintDescriptor.class"
     },
     {
-      "glob": "java/awt/Component.class"
-    },
-    {
-      "glob": "java/awt/Graphics.class"
-    },
-    {
-      "glob": "java/awt/Rectangle.class"
-    },
-    {
-      "glob": "java/beans/PropertyChangeListener.class"
-    },
-    {
       "glob": "java/beans/PropertyEditor.class"
     },
     {
@@ -22619,9 +20719,6 @@
       "glob": "java/lang/invoke/VarHandle.class"
     },
     {
-      "glob": "java/lang/ref/ReferenceQueue.class"
-    },
-    {
       "glob": "java/lang/ref/SoftReference.class"
     },
     {
@@ -22899,9 +20996,6 @@
     },
     {
       "glob": "java/sql/NClob.class"
-    },
-    {
-      "glob": "java/sql/ParameterMetaData.class"
     },
     {
       "glob": "java/sql/PreparedStatement.class"
@@ -23198,9 +21292,6 @@
       "glob": "java/util/LinkedHashSet.class"
     },
     {
-      "glob": "java/util/LinkedList.class"
-    },
-    {
       "glob": "java/util/List.class"
     },
     {
@@ -23316,9 +21407,6 @@
     },
     {
       "glob": "java/util/TimeZone.class"
-    },
-    {
-      "glob": "java/util/TreeSet.class"
     },
     {
       "glob": "java/util/UUID.class"
@@ -23457,9 +21545,6 @@
     },
     {
       "glob": "java/util/concurrent/locks/ReadWriteLock.class"
-    },
-    {
-      "glob": "java/util/concurrent/locks/ReentrantLock.class"
     },
     {
       "glob": "java/util/function/BiConsumer.class"
@@ -23798,16 +21883,10 @@
       "glob": "logback.xml"
     },
     {
-      "glob": "lombok/Generated.class"
-    },
-    {
       "glob": "lombok/NonNull.class"
     },
     {
       "glob": "long.class"
-    },
-    {
-      "glob": "mapper"
     },
     {
       "glob": "messages.properties"
@@ -23832,297 +21911,6 @@
     },
     {
       "glob": "org/apache/commons/logging/Log.class"
-    },
-    {
-      "glob": "org/apache/ibatis/annotations/DeleteProvider$List.class"
-    },
-    {
-      "glob": "org/apache/ibatis/annotations/DeleteProvider.class"
-    },
-    {
-      "glob": "org/apache/ibatis/annotations/InsertProvider$List.class"
-    },
-    {
-      "glob": "org/apache/ibatis/annotations/InsertProvider.class"
-    },
-    {
-      "glob": "org/apache/ibatis/annotations/Param.class"
-    },
-    {
-      "glob": "org/apache/ibatis/annotations/SelectProvider$List.class"
-    },
-    {
-      "glob": "org/apache/ibatis/annotations/SelectProvider.class"
-    },
-    {
-      "glob": "org/apache/ibatis/annotations/UpdateProvider$List.class"
-    },
-    {
-      "glob": "org/apache/ibatis/annotations/UpdateProvider.class"
-    },
-    {
-      "glob": "org/apache/ibatis/binding/MapperRegistry.class"
-    },
-    {
-      "glob": "org/apache/ibatis/builder/BaseBuilder.class"
-    },
-    {
-      "glob": "org/apache/ibatis/builder/CacheRefResolver.class"
-    },
-    {
-      "glob": "org/apache/ibatis/builder/MapperBuilderAssistant.class"
-    },
-    {
-      "glob": "org/apache/ibatis/builder/ResultMapResolver.class"
-    },
-    {
-      "glob": "org/apache/ibatis/builder/annotation/MapperAnnotationBuilder.class"
-    },
-    {
-      "glob": "org/apache/ibatis/builder/annotation/MethodResolver.class"
-    },
-    {
-      "glob": "org/apache/ibatis/builder/annotation/ProviderContext.class"
-    },
-    {
-      "glob": "org/apache/ibatis/builder/xml/XMLStatementBuilder.class"
-    },
-    {
-      "glob": "org/apache/ibatis/cache/Cache.class"
-    },
-    {
-      "glob": "org/apache/ibatis/cache/CacheKey.class"
-    },
-    {
-      "glob": "org/apache/ibatis/cache/decorators/FifoCache.class"
-    },
-    {
-      "glob": "org/apache/ibatis/cache/decorators/LruCache.class"
-    },
-    {
-      "glob": "org/apache/ibatis/cache/decorators/SoftCache.class"
-    },
-    {
-      "glob": "org/apache/ibatis/cache/decorators/WeakCache.class"
-    },
-    {
-      "glob": "org/apache/ibatis/cache/impl/PerpetualCache.class"
-    },
-    {
-      "glob": "org/apache/ibatis/cursor/Cursor.class"
-    },
-    {
-      "glob": "org/apache/ibatis/executor/BatchResult.class"
-    },
-    {
-      "glob": "org/apache/ibatis/executor/Executor.class"
-    },
-    {
-      "glob": "org/apache/ibatis/executor/keygen/KeyGenerator.class"
-    },
-    {
-      "glob": "org/apache/ibatis/executor/loader/ProxyFactory.class"
-    },
-    {
-      "glob": "org/apache/ibatis/executor/parameter/ParameterHandler.class"
-    },
-    {
-      "glob": "org/apache/ibatis/executor/resultset/ResultSetHandler.class"
-    },
-    {
-      "glob": "org/apache/ibatis/executor/statement/BaseStatementHandler.class"
-    },
-    {
-      "glob": "org/apache/ibatis/executor/statement/RoutingStatementHandler.class"
-    },
-    {
-      "glob": "org/apache/ibatis/executor/statement/StatementHandler.class"
-    },
-    {
-      "glob": "org/apache/ibatis/io/VFS.class"
-    },
-    {
-      "glob": "org/apache/ibatis/logging/Log.class"
-    },
-    {
-      "glob": "org/apache/ibatis/logging/commons/JakartaCommonsLoggingImpl.class"
-    },
-    {
-      "glob": "org/apache/ibatis/logging/jdk14/Jdk14LoggingImpl.class"
-    },
-    {
-      "glob": "org/apache/ibatis/logging/log4j2/Log4j2Impl.class"
-    },
-    {
-      "glob": "org/apache/ibatis/logging/nologging/NoLoggingImpl.class"
-    },
-    {
-      "glob": "org/apache/ibatis/logging/slf4j/Slf4jImpl.class"
-    },
-    {
-      "glob": "org/apache/ibatis/logging/stdout/StdOutImpl.class"
-    },
-    {
-      "glob": "org/apache/ibatis/mapping/BoundSql.class"
-    },
-    {
-      "glob": "org/apache/ibatis/mapping/DatabaseIdProvider.class"
-    },
-    {
-      "glob": "org/apache/ibatis/mapping/Discriminator.class"
-    },
-    {
-      "glob": "org/apache/ibatis/mapping/Environment.class"
-    },
-    {
-      "glob": "org/apache/ibatis/mapping/MappedStatement.class"
-    },
-    {
-      "glob": "org/apache/ibatis/mapping/ParameterMap$1.class"
-    },
-    {
-      "glob": "org/apache/ibatis/mapping/ParameterMap.class"
-    },
-    {
-      "glob": "org/apache/ibatis/mapping/ParameterMapping$1.class"
-    },
-    {
-      "glob": "org/apache/ibatis/mapping/ParameterMapping.class"
-    },
-    {
-      "glob": "org/apache/ibatis/mapping/ParameterMode.class"
-    },
-    {
-      "glob": "org/apache/ibatis/mapping/ResultFlag.class"
-    },
-    {
-      "glob": "org/apache/ibatis/mapping/ResultMap$1.class"
-    },
-    {
-      "glob": "org/apache/ibatis/mapping/ResultMap.class"
-    },
-    {
-      "glob": "org/apache/ibatis/mapping/ResultMapping.class"
-    },
-    {
-      "glob": "org/apache/ibatis/mapping/ResultSetType.class"
-    },
-    {
-      "glob": "org/apache/ibatis/mapping/SqlCommandType.class"
-    },
-    {
-      "glob": "org/apache/ibatis/mapping/SqlSource.class"
-    },
-    {
-      "glob": "org/apache/ibatis/mapping/StatementType.class"
-    },
-    {
-      "glob": "org/apache/ibatis/parsing/XNode.class"
-    },
-    {
-      "glob": "org/apache/ibatis/parsing/XPathParser.class"
-    },
-    {
-      "glob": "org/apache/ibatis/plugin/Interceptor.class"
-    },
-    {
-      "glob": "org/apache/ibatis/plugin/InterceptorChain.class"
-    },
-    {
-      "glob": "org/apache/ibatis/plugin/Invocation.class"
-    },
-    {
-      "glob": "org/apache/ibatis/reflection/MetaObject.class"
-    },
-    {
-      "glob": "org/apache/ibatis/reflection/Reflector.class"
-    },
-    {
-      "glob": "org/apache/ibatis/reflection/ReflectorFactory.class"
-    },
-    {
-      "glob": "org/apache/ibatis/reflection/TypeParameterResolver.class"
-    },
-    {
-      "glob": "org/apache/ibatis/reflection/factory/ObjectFactory.class"
-    },
-    {
-      "glob": "org/apache/ibatis/reflection/wrapper/ObjectWrapperFactory.class"
-    },
-    {
-      "glob": "org/apache/ibatis/scripting/LanguageDriver.class"
-    },
-    {
-      "glob": "org/apache/ibatis/scripting/LanguageDriverRegistry.class"
-    },
-    {
-      "glob": "org/apache/ibatis/scripting/defaults/RawLanguageDriver.class"
-    },
-    {
-      "glob": "org/apache/ibatis/scripting/xmltags/XMLLanguageDriver.class"
-    },
-    {
-      "glob": "org/apache/ibatis/session/AutoMappingBehavior.class"
-    },
-    {
-      "glob": "org/apache/ibatis/session/AutoMappingUnknownColumnBehavior.class"
-    },
-    {
-      "glob": "org/apache/ibatis/session/Configuration.class"
-    },
-    {
-      "glob": "org/apache/ibatis/session/ExecutorType.class"
-    },
-    {
-      "glob": "org/apache/ibatis/session/LocalCacheScope.class"
-    },
-    {
-      "glob": "org/apache/ibatis/session/ResultHandler.class"
-    },
-    {
-      "glob": "org/apache/ibatis/session/RowBounds.class"
-    },
-    {
-      "glob": "org/apache/ibatis/session/SqlSession.class"
-    },
-    {
-      "glob": "org/apache/ibatis/session/SqlSessionFactory.class"
-    },
-    {
-      "glob": "org/apache/ibatis/session/SqlSessionFactoryBuilder.class"
-    },
-    {
-      "glob": "org/apache/ibatis/session/TransactionIsolationLevel.class"
-    },
-    {
-      "glob": "org/apache/ibatis/transaction/Transaction.class"
-    },
-    {
-      "glob": "org/apache/ibatis/transaction/TransactionFactory.class"
-    },
-    {
-      "glob": "org/apache/ibatis/type/BaseTypeHandler.class"
-    },
-    {
-      "glob": "org/apache/ibatis/type/JdbcType.class"
-    },
-    {
-      "glob": "org/apache/ibatis/type/ObjectTypeHandler.class"
-    },
-    {
-      "glob": "org/apache/ibatis/type/TypeAliasRegistry.class"
-    },
-    {
-      "glob": "org/apache/ibatis/type/TypeHandler.class"
-    },
-    {
-      "glob": "org/apache/ibatis/type/TypeHandlerRegistry.class"
-    },
-    {
-      "glob": "org/apache/ibatis/type/TypeReference.class"
-    },
-    {
-      "glob": "org/apache/ibatis/type/UnknownTypeHandler.class"
     },
     {
       "glob": "org/apache/rocketmq/client/annotation/RocketMQMessageListener.class"
@@ -24276,36 +22064,6 @@
     },
     {
       "glob": "org/jspecify/annotations/NullUnmarked.class"
-    },
-    {
-      "glob": "org/mybatis/logging/Logger.class"
-    },
-    {
-      "glob": "org/mybatis/spring/SqlSessionFactoryBean.class"
-    },
-    {
-      "glob": "org/mybatis/spring/SqlSessionTemplate.class"
-    },
-    {
-      "glob": "org/mybatis/spring/annotation/MapperScan.class"
-    },
-    {
-      "glob": "org/mybatis/spring/annotation/MapperScannerRegistrar$RepeatingRegistrar.class"
-    },
-    {
-      "glob": "org/mybatis/spring/annotation/MapperScannerRegistrar.class"
-    },
-    {
-      "glob": "org/mybatis/spring/annotation/MapperScans.class"
-    },
-    {
-      "glob": "org/mybatis/spring/mapper/MapperFactoryBean.class"
-    },
-    {
-      "glob": "org/mybatis/spring/mapper/MapperScannerConfigurer.class"
-    },
-    {
-      "glob": "org/mybatis/spring/support/SqlSessionDaoSupport.class"
     },
     {
       "glob": "org/postgresql/driverconfig.properties"
@@ -24731,21 +22489,6 @@
       "glob": "org/springframework/aop/support/AopUtils.class"
     },
     {
-      "glob": "org/springframework/aot/generate/GeneratedClasses.class"
-    },
-    {
-      "glob": "org/springframework/aot/generate/GeneratedFiles.class"
-    },
-    {
-      "glob": "org/springframework/aot/generate/GeneratedMethods.class"
-    },
-    {
-      "glob": "org/springframework/aot/generate/GenerationContext.class"
-    },
-    {
-      "glob": "org/springframework/aot/generate/MethodReference.class"
-    },
-    {
       "glob": "org/springframework/aot/hint/BindingReflectionHintsRegistrar.class"
     },
     {
@@ -24762,12 +22505,6 @@
     },
     {
       "glob": "org/springframework/aot/hint/FieldHint.class"
-    },
-    {
-      "glob": "org/springframework/aot/hint/JdkProxyHint$Builder.class"
-    },
-    {
-      "glob": "org/springframework/aot/hint/JdkProxyHint.class"
     },
     {
       "glob": "org/springframework/aot/hint/LambdaHint$Builder.class"
@@ -24791,22 +22528,7 @@
       "glob": "org/springframework/aot/hint/ReflectionHints.class"
     },
     {
-      "glob": "org/springframework/aot/hint/ResourceBundleHint$Builder.class"
-    },
-    {
-      "glob": "org/springframework/aot/hint/ResourceBundleHint.class"
-    },
-    {
       "glob": "org/springframework/aot/hint/ResourceHints.class"
-    },
-    {
-      "glob": "org/springframework/aot/hint/ResourcePatternHint.class"
-    },
-    {
-      "glob": "org/springframework/aot/hint/ResourcePatternHints$Builder.class"
-    },
-    {
-      "glob": "org/springframework/aot/hint/ResourcePatternHints.class"
     },
     {
       "glob": "org/springframework/aot/hint/RuntimeHints.class"
@@ -24839,12 +22561,6 @@
       "glob": "org/springframework/aot/hint/annotation/SimpleReflectiveProcessor.class"
     },
     {
-      "glob": "org/springframework/beans/BeanMetadataAttribute.class"
-    },
-    {
-      "glob": "org/springframework/beans/BeanMetadataAttributeAccessor.class"
-    },
-    {
       "glob": "org/springframework/beans/BeanMetadataElement.class"
     },
     {
@@ -24854,19 +22570,7 @@
       "glob": "org/springframework/beans/MutablePropertyValues.class"
     },
     {
-      "glob": "org/springframework/beans/PropertyEditorRegistrar.class"
-    },
-    {
       "glob": "org/springframework/beans/PropertyEditorRegistry.class"
-    },
-    {
-      "glob": "org/springframework/beans/PropertyValue.class"
-    },
-    {
-      "glob": "org/springframework/beans/PropertyValues.class"
-    },
-    {
-      "glob": "org/springframework/beans/TypeConverter.class"
     },
     {
       "glob": "org/springframework/beans/factory/Aware.class"
@@ -24875,25 +22579,13 @@
       "glob": "org/springframework/beans/factory/BeanClassLoaderAware.class"
     },
     {
-      "glob": "org/springframework/beans/factory/BeanDefinitionStoreException.class"
-    },
-    {
       "glob": "org/springframework/beans/factory/BeanFactory.class"
     },
     {
       "glob": "org/springframework/beans/factory/BeanFactoryAware.class"
     },
     {
-      "glob": "org/springframework/beans/factory/BeanInitializationException.class"
-    },
-    {
-      "glob": "org/springframework/beans/factory/BeanNameAware.class"
-    },
-    {
       "glob": "org/springframework/beans/factory/DisposableBean.class"
-    },
-    {
-      "glob": "org/springframework/beans/factory/FactoryBean.class"
     },
     {
       "glob": "org/springframework/beans/factory/HierarchicalBeanFactory.class"
@@ -24926,103 +22618,25 @@
       "glob": "org/springframework/beans/factory/annotation/Value.class"
     },
     {
-      "glob": "org/springframework/beans/factory/aot/BeanFactoryInitializationAotContribution.class"
-    },
-    {
-      "glob": "org/springframework/beans/factory/aot/BeanFactoryInitializationAotProcessor.class"
-    },
-    {
-      "glob": "org/springframework/beans/factory/aot/BeanFactoryInitializationCode.class"
-    },
-    {
-      "glob": "org/springframework/beans/factory/aot/BeanRegistrationExcludeFilter.class"
-    },
-    {
       "glob": "org/springframework/beans/factory/config/AutowireCapableBeanFactory.class"
     },
     {
       "glob": "org/springframework/beans/factory/config/BeanDefinition.class"
     },
     {
-      "glob": "org/springframework/beans/factory/config/BeanDefinitionHolder.class"
-    },
-    {
-      "glob": "org/springframework/beans/factory/config/BeanExpressionResolver.class"
-    },
-    {
       "glob": "org/springframework/beans/factory/config/BeanFactoryPostProcessor.class"
-    },
-    {
-      "glob": "org/springframework/beans/factory/config/BeanPostProcessor.class"
-    },
-    {
-      "glob": "org/springframework/beans/factory/config/BeanReference.class"
-    },
-    {
-      "glob": "org/springframework/beans/factory/config/ConfigurableBeanFactory.class"
     },
     {
       "glob": "org/springframework/beans/factory/config/ConfigurableListableBeanFactory.class"
     },
     {
-      "glob": "org/springframework/beans/factory/config/ConstructorArgumentValues$ValueHolder.class"
-    },
-    {
       "glob": "org/springframework/beans/factory/config/ConstructorArgumentValues.class"
-    },
-    {
-      "glob": "org/springframework/beans/factory/config/DependencyDescriptor.class"
-    },
-    {
-      "glob": "org/springframework/beans/factory/config/NamedBeanHolder.class"
-    },
-    {
-      "glob": "org/springframework/beans/factory/config/RuntimeBeanReference.class"
-    },
-    {
-      "glob": "org/springframework/beans/factory/config/Scope.class"
-    },
-    {
-      "glob": "org/springframework/beans/factory/config/SingletonBeanRegistry.class"
-    },
-    {
-      "glob": "org/springframework/beans/factory/support/AbstractBeanDefinition.class"
-    },
-    {
-      "glob": "org/springframework/beans/factory/support/AutowireCandidateQualifier.class"
-    },
-    {
-      "glob": "org/springframework/beans/factory/support/BeanDefinitionDefaults.class"
     },
     {
       "glob": "org/springframework/beans/factory/support/BeanDefinitionRegistry.class"
     },
     {
-      "glob": "org/springframework/beans/factory/support/BeanDefinitionRegistryPostProcessor.class"
-    },
-    {
-      "glob": "org/springframework/beans/factory/support/BeanDefinitionValidationException.class"
-    },
-    {
       "glob": "org/springframework/beans/factory/support/BeanNameGenerator.class"
-    },
-    {
-      "glob": "org/springframework/beans/factory/support/MergedBeanDefinitionPostProcessor.class"
-    },
-    {
-      "glob": "org/springframework/beans/factory/support/MethodOverride.class"
-    },
-    {
-      "glob": "org/springframework/beans/factory/support/MethodOverrides.class"
-    },
-    {
-      "glob": "org/springframework/beans/factory/support/RegisteredBean$InstantiationDescriptor.class"
-    },
-    {
-      "glob": "org/springframework/beans/factory/support/RegisteredBean.class"
-    },
-    {
-      "glob": "org/springframework/beans/factory/support/RootBeanDefinition.class"
     },
     {
       "glob": "org/springframework/boot/ApplicationArguments.class"
@@ -25356,12 +22970,6 @@
     },
     {
       "glob": "org/springframework/boot/autoconfigure/info/ProjectInfoAutoConfiguration.class"
-    },
-    {
-      "glob": "org/springframework/boot/autoconfigure/jdbc$DataSourceAutoConfiguration.class"
-    },
-    {
-      "glob": "org/springframework/boot/autoconfigure/jdbc/DataSourceAutoConfiguration.class"
     },
     {
       "glob": "org/springframework/boot/autoconfigure/jmx/JmxAutoConfiguration.class"
@@ -26105,12 +23713,6 @@
       "glob": "org/springframework/context/annotation/ScopedProxyMode.class"
     },
     {
-      "glob": "org/springframework/context/event/ApplicationContextEvent.class"
-    },
-    {
-      "glob": "org/springframework/context/event/ContextRefreshedEvent.class"
-    },
-    {
       "glob": "org/springframework/context/event/EventListener.class"
     },
     {
@@ -26118,9 +23720,6 @@
     },
     {
       "glob": "org/springframework/core/AttributeAccessor.class"
-    },
-    {
-      "glob": "org/springframework/core/AttributeAccessorSupport.class"
     },
     {
       "glob": "org/springframework/core/DefaultParameterNameDiscoverer.class"
@@ -26147,16 +23746,10 @@
       "glob": "org/springframework/core/PrioritizedParameterNameDiscoverer.class"
     },
     {
-      "glob": "org/springframework/core/ResolvableType$VariableResolver.class"
-    },
-    {
       "glob": "org/springframework/core/ResolvableType.class"
     },
     {
       "glob": "org/springframework/core/ResolvableTypeProvider.class"
-    },
-    {
-      "glob": "org/springframework/core/SerializableTypeWrapper$TypeProvider.class"
     },
     {
       "glob": "org/springframework/core/annotation/AliasFor.class"
@@ -26301,12 +23894,6 @@
     },
     {
       "glob": "org/springframework/dao/TransientDataAccessException.class"
-    },
-    {
-      "glob": "org/springframework/dao/support/DaoSupport.class"
-    },
-    {
-      "glob": "org/springframework/dao/support/PersistenceExceptionTranslator.class"
     },
     {
       "glob": "org/springframework/expression/AccessException.class"
@@ -26471,13 +24058,43 @@
       "glob": "org/springframework/http/server/reactive/SslInfo.class"
     },
     {
-      "glob": "org/springframework/javapoet/ClassName.class"
+      "glob": "org/springframework/jdbc/core/JdbcOperations.class"
+    },
+    {
+      "glob": "org/springframework/jdbc/core/ResultSetExtractor.class"
+    },
+    {
+      "glob": "org/springframework/jdbc/core/RowCallbackHandler.class"
+    },
+    {
+      "glob": "org/springframework/jdbc/core/RowMapper.class"
+    },
+    {
+      "glob": "org/springframework/jdbc/core/namedparam/NamedParameterJdbcOperations.class"
+    },
+    {
+      "glob": "org/springframework/jdbc/core/namedparam/SqlParameterSource.class"
+    },
+    {
+      "glob": "org/springframework/jdbc/core/simple/JdbcClient$MappedQuerySpec.class"
+    },
+    {
+      "glob": "org/springframework/jdbc/core/simple/JdbcClient$ResultQuerySpec.class"
+    },
+    {
+      "glob": "org/springframework/jdbc/core/simple/JdbcClient$StatementSpec.class"
+    },
+    {
+      "glob": "org/springframework/jdbc/core/simple/JdbcClient.class"
     },
     {
       "glob": "org/springframework/jdbc/datasource/DataSourceTransactionManager.class"
     },
     {
       "glob": "org/springframework/jdbc/support/JdbcTransactionManager.class"
+    },
+    {
+      "glob": "org/springframework/jdbc/support/KeyHolder.class"
     },
     {
       "glob": "org/springframework/jdbc/support/SQLExceptionTranslator.class"
@@ -26840,9 +24457,6 @@
       "glob": "org/springframework/transaction/annotation/TransactionManagementConfigurationSelector.class"
     },
     {
-      "glob": "org/springframework/transaction/annotation/TransactionManagementConfigurer.class"
-    },
-    {
       "glob": "org/springframework/transaction/annotation/Transactional.class"
     },
     {
@@ -26882,40 +24496,13 @@
       "glob": "org/springframework/transaction/support/TransactionTemplate.class"
     },
     {
-      "glob": "org/springframework/util/AntPathMatcher.class"
-    },
-    {
-      "glob": "org/springframework/util/ClassUtils.class"
-    },
-    {
-      "glob": "org/springframework/util/ConcurrentReferenceHashMap.class"
-    },
-    {
       "glob": "org/springframework/util/MimeType.class"
     },
     {
       "glob": "org/springframework/util/MultiValueMap.class"
     },
     {
-      "glob": "org/springframework/util/ReflectionUtils$FieldCallback.class"
-    },
-    {
-      "glob": "org/springframework/util/ReflectionUtils$FieldFilter.class"
-    },
-    {
-      "glob": "org/springframework/util/ReflectionUtils$MethodCallback.class"
-    },
-    {
-      "glob": "org/springframework/util/ReflectionUtils$MethodFilter.class"
-    },
-    {
-      "glob": "org/springframework/util/ReflectionUtils.class"
-    },
-    {
       "glob": "org/springframework/util/StringUtils.class"
-    },
-    {
-      "glob": "org/springframework/util/StringValueResolver.class"
     },
     {
       "glob": "org/springframework/util/function/ThrowingConsumer.class"
@@ -27033,9 +24620,6 @@
     },
     {
       "glob": "org/springframework/web/server/ServerWebInputException.class"
-    },
-    {
-      "glob": "org/w3c/dom/Node.class"
     },
     {
       "glob": "org/yaml/snakeyaml/DumperOptions$FlowStyle.class"
@@ -28247,10 +25831,6 @@
     },
     {
       "module": "java.base",
-      "glob": "java/lang/ref/ReferenceQueue.class"
-    },
-    {
-      "module": "java.base",
       "glob": "java/lang/ref/SoftReference.class"
     },
     {
@@ -28895,10 +26475,6 @@
     },
     {
       "module": "java.base",
-      "glob": "java/util/LinkedList.class"
-    },
-    {
-      "module": "java.base",
       "glob": "java/util/List.class"
     },
     {
@@ -29052,10 +26628,6 @@
     {
       "module": "java.base",
       "glob": "java/util/TimeZone.class"
-    },
-    {
-      "module": "java.base",
-      "glob": "java/util/TreeSet.class"
     },
     {
       "module": "java.base",
@@ -29240,10 +26812,6 @@
     {
       "module": "java.base",
       "glob": "java/util/concurrent/locks/ReadWriteLock.class"
-    },
-    {
-      "module": "java.base",
-      "glob": "java/util/concurrent/locks/ReentrantLock.class"
     },
     {
       "module": "java.base",
@@ -29727,22 +27295,6 @@
     },
     {
       "module": "java.desktop",
-      "glob": "java/awt/Component.class"
-    },
-    {
-      "module": "java.desktop",
-      "glob": "java/awt/Graphics.class"
-    },
-    {
-      "module": "java.desktop",
-      "glob": "java/awt/Rectangle.class"
-    },
-    {
-      "module": "java.desktop",
-      "glob": "java/beans/PropertyChangeListener.class"
-    },
-    {
-      "module": "java.desktop",
       "glob": "java/beans/PropertyEditor.class"
     },
     {
@@ -29792,10 +27344,6 @@
     {
       "module": "java.sql",
       "glob": "java/sql/NClob.class"
-    },
-    {
-      "module": "java.sql",
-      "glob": "java/sql/ParameterMetaData.class"
     },
     {
       "module": "java.sql",
@@ -29884,10 +27432,6 @@
     {
       "module": "java.sql",
       "glob": "javax/sql/DataSource.class"
-    },
-    {
-      "module": "java.xml",
-      "glob": "org/w3c/dom/Node.class"
     },
     {
       "module": "jdk.jfr",

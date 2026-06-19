@@ -15,14 +15,16 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestPropertySource;
 
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.awaitility.Awaitility.await;
 
 @ApplicationModuleTest(
         module = "retrieval",
         mode = ApplicationModuleTest.BootstrapMode.ALL_DEPENDENCIES,
-        extraIncludes = "rag.infrastructure",
+        extraIncludes = "infrastructure",
         webEnvironment = SpringBootTest.WebEnvironment.NONE
 )
 @ActiveProfiles("test")
@@ -141,25 +143,31 @@ class RetrievalModuleTests {
 
         assertThat(events).isNotNull();
         assertThat(events).extracting("event").containsExactly("started");
-        assertThat(jdbc.queryForObject("SELECT status FROM rag_ask_runs", String.class)).isEqualTo("FAILED");
-        assertThat(jdbc.queryForObject("SELECT error_code FROM rag_ask_runs", String.class)).isEqualTo("CancellationException");
-        assertThat(jdbc.queryForObject(
-                "SELECT COUNT(*) FROM rag_conversation_messages WHERE role = 'assistant'",
-                Integer.class
-        )).isEqualTo(1);
-        assertThat(jdbc.queryForObject(
-                "SELECT status FROM rag_conversation_messages WHERE role = 'assistant'",
-                String.class
-        )).isEqualTo("FAILED");
-        assertThat(jdbc.queryForObject(
-                "SELECT content FROM rag_conversation_messages WHERE role = 'assistant'",
-                String.class
-        )).contains("RAG ask stream cancelled by client");
-        assertThat(jdbc.queryForObject(
-                "SELECT message_count FROM rag_conversations WHERE conversation_id = ?",
-                Integer.class,
-                "conv-001"
-        )).isEqualTo(2);
+        await()
+                .atMost(5, TimeUnit.SECONDS)
+                .untilAsserted(() -> {
+                    assertThat(jdbc.queryForObject("SELECT status FROM rag_ask_runs", String.class))
+                            .isEqualTo("FAILED");
+                    assertThat(jdbc.queryForObject("SELECT error_code FROM rag_ask_runs", String.class))
+                            .isEqualTo("CancellationException");
+                    assertThat(jdbc.queryForObject(
+                            "SELECT COUNT(*) FROM rag_conversation_messages WHERE role = 'assistant'",
+                            Integer.class
+                    )).isEqualTo(1);
+                    assertThat(jdbc.queryForObject(
+                            "SELECT status FROM rag_conversation_messages WHERE role = 'assistant'",
+                            String.class
+                    )).isEqualTo("FAILED");
+                    assertThat(jdbc.queryForObject(
+                            "SELECT content FROM rag_conversation_messages WHERE role = 'assistant'",
+                            String.class
+                    )).contains("RAG ask stream cancelled by client");
+                    assertThat(jdbc.queryForObject(
+                            "SELECT message_count FROM rag_conversations WHERE conversation_id = ?",
+                            Integer.class,
+                            "conv-001"
+                    )).isEqualTo(2);
+                });
     }
 
     @Test

@@ -1,6 +1,8 @@
 package com.involutionhell.backend.rag.indexing.web;
 
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.asyncDispatch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.request;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -15,6 +17,7 @@ import java.time.OffsetDateTime;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 class RagIndexingControllerTests {
@@ -76,7 +79,11 @@ class RagIndexingControllerTests {
                 .setControllerAdvice(new RagExceptionHandler())
                 .build();
 
-        mockMvc.perform(get("/public/rag/documents/index-timeline/{documentId}", 42L))
+        MvcResult result = mockMvc.perform(get("/public/rag/documents/index-timeline/{documentId}", 42L))
+                .andExpect(request().asyncStarted())
+                .andReturn();
+
+        mockMvc.perform(asyncDispatch(result))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true))
                 .andExpect(jsonPath("$.data.document.id").value(42))

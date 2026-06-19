@@ -23,7 +23,6 @@
         <spring-statemachine.version>4.0.1</spring-statemachine.version>
         <spring-modulith.version>2.0.5</spring-modulith.version>
         <rocketmq.version>2.3.5</rocketmq.version>
-        <mybatis-flex.version>1.11.7</mybatis-flex.version>
         <openai.version>4.11.0</openai.version>
         <native.maven.plugin.version>0.11.3</native.maven.plugin.version>
         <opentelemetry-instrumentation-alpha.version>2.27.0-alpha</opentelemetry-instrumentation-alpha.version>
@@ -120,20 +119,6 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-jdbc</artifactId>
-        </dependency>
-
-        <!-- mybatis-flex -->
-        <dependency>
-            <groupId>com.mybatis-flex</groupId>
-            <artifactId>mybatis-flex-spring-boot4-starter</artifactId>
-            <version>${mybatis-flex.version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>com.mybatis-flex</groupId>
-            <artifactId>mybatis-flex-processor</artifactId>
-            <version>1.11.7</version>
-            <scope>provided</scope>
         </dependency>
 
         <!-- statemachine -->
@@ -346,9 +331,6 @@
                         <buildArg>-march=compatibility</buildArg>
                         <buildArg>--no-fallback</buildArg>
                         <buildArg>--report-unsupported-elements-at-runtime</buildArg>
-                        <!-- 修改：只 initialize-at-build-time 包级别，不要整个包 -->
-                        <buildArg>--initialize-at-build-time=org.apache.ibatis.logging.LogFactory</buildArg>
-                        <buildArg>--initialize-at-build-time=org.apache.ibatis.logging.slf4j</buildArg>
                         <buildArg>--initialize-at-build-time=org.slf4j.helpers.BasicMarker</buildArg>
                     </buildArgs>
                 </configuration>
@@ -374,11 +356,6 @@
                         <path>
                             <groupId>org.springframework.boot</groupId>
                             <artifactId>spring-boot-configuration-processor</artifactId>
-                        </path>
-                        <path>
-                            <groupId>com.mybatis-flex</groupId>
-                            <artifactId>mybatis-flex-processor</artifactId>
-                            <version>${mybatis-flex.version}</version>
                         </path>
                     </annotationProcessorPaths>
                 </configuration>

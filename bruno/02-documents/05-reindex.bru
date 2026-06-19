@@ -1,0 +1,23 @@
+meta {
+  name: Reindex Document
+  type: http
+  seq: 5
+}
+
+post {
+  url: {{baseUrl}}/public/rag/documents/reindex/{{documentId}}
+  body: none
+  auth: none
+}
+
+headers {
+  Accept: application/json
+}
+
+tests {
+  test("accepts a reindex request", function() {
+    expect(res.status).to.equal(200);
+    expect(res.body.success).to.equal(true);
+    expect(res.body.data.id).to.equal(Number(bru.getVar("documentId")));
+  });
+}

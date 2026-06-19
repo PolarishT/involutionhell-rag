@@ -1,0 +1,30 @@
+meta {
+  name: Ask - SSE
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{baseUrl}}/public/rag/ask?userId={{userId}}&conversationId={{conversationId}}&question=What%20does%20the%20Bruno%20test%20document%20cover%3F&topK=3&sourceUriPrefix=bruno%3A%2F%2F&tags=bruno&tags=api&headingPathContains=Bruno&requestId={{requestId}}
+  body: none
+  auth: none
+}
+
+headers {
+  Accept: text/event-stream
+}
+
+tests {
+  test("streams server-sent events", function() {
+    expect(res.status).to.equal(200);
+    expect(res.headers["content-type"]).to.include("text/event-stream");
+  });
+
+  test("emits started and terminal events", function() {
+    const body = typeof res.body === "string" ? res.body : JSON.stringify(res.body);
+    expect(body).to.include("started");
+    expect(body).to.satisfy(function(value) {
+      return value.includes("completed") || value.includes("error");
+    });
+  });
+}

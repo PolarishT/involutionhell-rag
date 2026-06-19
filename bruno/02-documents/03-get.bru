@@ -1,0 +1,24 @@
+meta {
+  name: Get Document
+  type: http
+  seq: 3
+}
+
+get {
+  url: {{baseUrl}}/public/rag/documents/get/{{documentId}}
+  body: none
+  auth: none
+}
+
+headers {
+  Accept: application/json
+}
+
+tests {
+  test("gets the created document", function() {
+    expect(res.status).to.equal(200);
+    expect(res.body.success).to.equal(true);
+    expect(res.body.data.id).to.equal(Number(bru.getVar("documentId")));
+    expect(res.body.data.sourceUri).to.equal("bruno://json/document");
+  });
+}

@@ -1,0 +1,48 @@
+meta {
+  name: Create Document - JSON
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{baseUrl}}/public/rag/documents/create
+  body: json
+  auth: none
+}
+
+headers {
+  Accept: application/json
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "sourceType": "markdown",
+    "sourceUri": "bruno://json/document",
+    "externalRef": "bruno-json-001",
+    "title": "Bruno JSON Document",
+    "content": "# Bruno JSON Document\n\nThis document covers Bruno API regression testing.\n\n## API\n\nThe document lifecycle includes create, get, update, reindex and delete.",
+    "metadata": {
+      "tags": [
+        "bruno",
+        "api"
+      ],
+      "testSuite": "bruno"
+    }
+  }
+}
+
+script:post-response {
+  if (res.status === 200 && res.body && res.body.data) {
+    bru.setVar("documentId", res.body.data.id);
+  }
+}
+
+tests {
+  test("creates a document", function() {
+    expect(res.status).to.equal(200);
+    expect(res.body.success).to.equal(true);
+    expect(res.body.data.id).to.be.a("number");
+    expect(res.body.data.title).to.equal("Bruno JSON Document");
+  });
+}
