@@ -12,6 +12,7 @@ import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import org.springframework.http.MediaType;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -56,5 +57,13 @@ public class RagConversationController {
             @Valid @RequestBody RagConversationUpdateRequest request
     ) {
         return DataResponse.of(conversationService.updateConversation(conversationId, request));
+    }
+
+    @DeleteMapping("/{conversationId}")
+    public DataResponse<RagConversationSummaryView> deleteConversation(
+            @PathVariable @NotBlank(message = "conversationId 不能为空") String conversationId,
+            @RequestParam @NotBlank(message = "userId 不能为空") String userId
+    ) {
+        return DataResponse.of(conversationService.deleteConversation(userId, conversationId));
     }
 }

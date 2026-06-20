@@ -86,6 +86,7 @@ public class RagConversationService {
         userRepository.upsertSeen(userId);
         RagConversationRecord conversation = getOrCreateOwnedConversation(userId, conversationId, question);
         conversationRepository.lockById(conversation.id());
+        conversation = requireOwnedConversation(userId, conversation.conversationId(), true);
         if (normalizedRequestId != null) {
             var existingRun = askRunRepository.findByRequestId(userId, conversation.id(), normalizedRequestId);
             if (existingRun.isPresent()) {
@@ -280,6 +281,21 @@ public class RagConversationService {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "title 长度不能超过 200");
         }
         return toSummaryView(conversationRepository.update(request.userId(), conversationId, title, status));
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    public RagConversationSummaryView deleteConversation(String userId, String conversationId) {
+        requireText(userId, "userId 不能为空");
+        requireText(conversationId, "conversationId 不能为空");
+        RagConversationRecord conversation = conversationRepository.findByUserIdAndConversationId(userId, conversationId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "会话不存在"));
+        conversationRepository.lockById(conversation.id());
+        conversation = conversationRepository.findByUserIdAndConversationId(userId, conversationId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "会话不存在"));
+        if ("DELETED".equals(conversation.status())) {
+            return toSummaryView(conversation);
+        }
+        return toSummaryView(conversationRepository.update(userId, conversationId, null, "DELETED"));
     }
 
     private RagConversationRecord requireOwnedConversation(String userId, String conversationId, boolean detectConflict) {

@@ -341,6 +341,37 @@ class RetrievalModuleTests {
         assertThat(page.nextCursor()).isNull();
     }
 
+    @Test
+    void deleteConversationSoftDeletesAndIsIdempotent() {
+        var deleted = conversationService.deleteConversation("user-001", "conv-001");
+
+        assertThat(deleted.conversationId()).isEqualTo("conv-001");
+        assertThat(jdbc.queryForObject(
+                "SELECT status FROM rag_conversations WHERE conversation_id = ?",
+                String.class,
+                "conv-001"
+        )).isEqualTo("DELETED");
+        assertThat(conversationService.listConversations("user-001", 20, null).conversations()).isEmpty();
+        assertThatThrownBy(() -> conversationService.getMessages("user-001", "conv-001"))
+                .hasMessageContaining("404 NOT_FOUND");
+
+        var deletedAgain = conversationService.deleteConversation("user-001", "conv-001");
+
+        assertThat(deletedAgain.conversationId()).isEqualTo("conv-001");
+        assertThat(count("rag_conversations")).isEqualTo(1);
+    }
+
+    @Test
+    void deleteConversationDoesNotExposeAnotherUsersConversation() {
+        assertThatThrownBy(() -> conversationService.deleteConversation("user-002", "conv-001"))
+                .hasMessageContaining("404 NOT_FOUND");
+        assertThat(jdbc.queryForObject(
+                "SELECT status FROM rag_conversations WHERE conversation_id = ?",
+                String.class,
+                "conv-001"
+        )).isEqualTo("ACTIVE");
+    }
+
     private int count(String table) {
         Integer count = jdbc.queryForObject("SELECT COUNT(*) FROM " + table, Integer.class);
         return count == null ? 0 : count;

@@ -157,6 +157,43 @@ class RagConversationControllerTests {
         assertThat(service.messagesCursor).isEqualTo("cursor-1");
     }
 
+    @Test
+    void deleteConversationReturnsDeletedSummary() {
+        StubConversationService service = new StubConversationService(
+                null,
+                null,
+                null,
+                new RagConversationSummaryView(
+                        "conversation-1",
+                        "待删除会话",
+                        CREATED_AT,
+                        OffsetDateTime.parse("2026-06-17T00:03:00Z")
+                )
+        );
+        WebTestClient client = WebTestClient
+                .bindToController(new RagConversationController(service))
+                .build();
+
+        client.delete()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/public/rag/conversations/conversation-1")
+                        .queryParam("userId", "codex-bruno-test")
+                        .build())
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody()
+                .jsonPath("$.data.conversationId").isEqualTo("conversation-1")
+                .jsonPath("$.data.title").isEqualTo("待删除会话")
+                .jsonPath("$.data.createdAt").exists()
+                .jsonPath("$.data.updatedAt").exists()
+                .jsonPath("$.data.status").doesNotExist()
+                .jsonPath("$.success").doesNotExist()
+                .jsonPath("$.message").doesNotExist();
+
+        assertThat(service.deleteUserId).isEqualTo("codex-bruno-test");
+        assertThat(service.deleteConversationId).isEqualTo("conversation-1");
+    }
+
     private static final class StubConversationService extends RagConversationService {
 
         private final RagConversationListView listResponse;
@@ -171,28 +208,33 @@ class RagConversationControllerTests {
         private String messagesConversationId;
         private Integer messagesLimit;
         private String messagesCursor;
+        private final RagConversationSummaryView deleteResponse;
+        private String deleteUserId;
+        private String deleteConversationId;
 
         private StubConversationService(RagConversationListView listResponse) {
-            this(listResponse, null, null);
+            this(listResponse, null, null, null);
         }
 
         private StubConversationService(RagConversationSummaryView updateResponse) {
-            this(null, updateResponse, null);
+            this(null, updateResponse, null, null);
         }
 
         private StubConversationService(RagConversationMessagesView messagesResponse) {
-            this(null, null, messagesResponse);
+            this(null, null, messagesResponse, null);
         }
 
         private StubConversationService(
                 RagConversationListView listResponse,
                 RagConversationSummaryView updateResponse,
-                RagConversationMessagesView messagesResponse
+                RagConversationMessagesView messagesResponse,
+                RagConversationSummaryView deleteResponse
         ) {
             super(null, null, null, null, null);
             this.listResponse = listResponse;
             this.updateResponse = updateResponse;
             this.messagesResponse = messagesResponse;
+            this.deleteResponse = deleteResponse;
         }
 
         @Override
@@ -225,6 +267,13 @@ class RagConversationControllerTests {
             this.messagesLimit = limit;
             this.messagesCursor = cursor;
             return messagesResponse;
+        }
+
+        @Override
+        public RagConversationSummaryView deleteConversation(String userId, String conversationId) {
+            this.deleteUserId = userId;
+            this.deleteConversationId = conversationId;
+            return deleteResponse;
         }
     }
 }

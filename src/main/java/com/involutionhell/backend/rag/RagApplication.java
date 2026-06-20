@@ -1,6 +1,7 @@
 package com.involutionhell.backend.rag;
 
-import com.involutionhell.backend.rag.infrastructure.nativeimage.RagRuntimeHints;
+
+import com.involutionhell.backend.rag.infrastructure.nativeimage.RagNativeConfiguration;
 import com.involutionhell.backend.rag.shared.properties.RagProperties;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -14,7 +15,7 @@ import org.springframework.modulith.Modulith;
         systemName = "Involution Hell RAG Backend",
         sharedModules = "shared"
 )
-@ImportRuntimeHints(RagRuntimeHints.class)
+@ImportRuntimeHints(RagNativeConfiguration.RagRuntimeHintsRegistrar.class)
 public class RagApplication {
 
     static void main(String[] args) {
