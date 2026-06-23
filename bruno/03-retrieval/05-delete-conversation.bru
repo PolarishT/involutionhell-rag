@@ -1,0 +1,22 @@
+meta {
+  name: Delete Conversation
+  type: http
+  seq: 5
+}
+
+delete {
+  url: {{baseUrl}}/public/rag/conversations/{{conversationId}}?userId={{userId}}
+  body: none
+  auth: none
+}
+
+headers {
+  Accept: application/json
+}
+
+tests {
+  test("soft deletes the conversation", function() {
+    expect(res.status).to.equal(200);
+    expect(res.body.data.conversationId).to.equal(bru.getEnvVar("conversationId"));
+  });
+}
